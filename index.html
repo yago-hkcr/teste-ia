@@ -542,7 +542,12 @@
       .credit-name{font-size:20px}
       .credit-role{font-size:6px;letter-spacing:.1em}
       .credit-edge{margin-top:2px}
-      .nav{gap:12px;font-size:8.5px;letter-spacing:.1em}
+      .top{gap:10px;padding:14px var(--pad)}
+      .brand{font-size:17px;letter-spacing:-.9px}
+      .brand .spark{font-size:10px;margin-left:5px}
+      .nav{gap:9px;font-size:6.8px;letter-spacing:.03em}
+      .nav a{padding:4px 0;white-space:nowrap}
+      .sound{padding:6px 7px;font-size:6.8px;gap:5px}
       h1{font-size:clamp(46px,13vw,74px)}
       .stats{gap:10px}
       .stats dd{font-size:8px;letter-spacing:.1em}
@@ -558,12 +563,93 @@
       *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
       [data-anim]{opacity:1;transform:none;filter:none;clip-path:none}
     }
+
+    /* ---------- intro: júpiter, saturno e a explosão ---------- */
+    html.intro-lock,html.intro-lock body{overflow:hidden!important}
+    .intro{
+      position:fixed;inset:0;z-index:300;overflow:hidden;isolation:isolate;
+      background:radial-gradient(125% 95% at 50% 42%,#0f1a17 0%,#080a0c 54%,#040406 100%);
+      opacity:1;transition:opacity .8s ease;
+    }
+    .intro.is-out{opacity:0;pointer-events:none}
+    .intro-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
+    .intro-vignette{
+      position:absolute;inset:0;pointer-events:none;
+      background:radial-gradient(88% 72% at 50% 44%,transparent 38%,rgba(3,4,5,.78) 100%);
+    }
+    .intro-meta{
+      position:absolute;left:var(--pad);right:var(--pad);top:calc(var(--pad) + 4px);
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      font-family:var(--mono);font-size:8px;letter-spacing:.26em;text-transform:uppercase;
+      color:rgba(215,255,230,.58);
+    }
+    .intro-brand{font-family:var(--sans,inherit);font-size:15px;font-weight:600;letter-spacing:-.03em;text-transform:none;color:var(--ink)}
+    .intro-brand sup{font-size:7px;vertical-align:super;color:var(--acid)}
+    .intro-brand i{font-style:normal;color:var(--acid);margin-left:7px}
+    .intro-foot{
+      position:absolute;left:var(--pad);right:var(--pad);bottom:calc(var(--pad) + 2px);
+      display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+      font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+      color:rgba(215,255,230,.52);
+    }
+    .intro-phase{display:flex;align-items:center;gap:10px;min-height:14px}
+    .intro-phase::before{
+      content:'';width:5px;height:5px;border-radius:50%;background:var(--acid);
+      box-shadow:0 0 12px var(--acid);animation:introPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes introPulse{0%,100%{opacity:.3;transform:scale(.65)}50%{opacity:1;transform:scale(1)}}
+    .intro-count{color:rgba(215,255,230,.36);white-space:nowrap}
+    .intro-count b{font-weight:400;color:var(--acid)}
+    .intro-skip{
+      pointer-events:auto;display:inline-flex;align-items:center;gap:12px;
+      font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+      color:rgba(233,255,241,.82);background:rgba(8,14,11,.42);
+      border:1px solid rgba(160,255,200,.22);border-radius:999px;padding:10px 16px;
+      cursor:pointer;backdrop-filter:blur(8px);
+      transition:background .3s ease,color .3s ease,border-color .3s ease;
+    }
+    .intro-skip:hover,.intro-skip:focus-visible{color:#06130c;background:var(--acid);border-color:var(--acid);outline:none}
+    .intro-skip span{transition:transform .3s ease}
+    .intro-skip:hover span{transform:translateX(3px)}
+    .intro-words{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .intro-word{
+      position:absolute;left:0;top:0;white-space:nowrap;opacity:0;
+      font-family:var(--mono);font-size:clamp(9px,1.05vw,13px);letter-spacing:.24em;text-transform:uppercase;
+      color:rgba(224,255,236,.92);text-shadow:0 0 18px rgba(60,255,140,.35);
+      will-change:transform,opacity;
+    }
+    .intro-word.acid{color:var(--acid);text-shadow:0 0 24px rgba(154,255,0,.45)}
+    .intro-word.big{font-size:clamp(12px,1.7vw,20px);letter-spacing:.14em;color:#f4fff8;text-shadow:0 0 26px rgba(120,255,170,.4)}
+    @media(max-width:640px){
+      .intro-meta{font-size:7px;letter-spacing:.2em}
+      .intro-brand{font-size:13px}
+      .intro-foot{font-size:7px;letter-spacing:.16em;gap:12px}
+      .intro-word{font-size:10px;letter-spacing:.2em}
+      .intro-word.big{font-size:14px;letter-spacing:.12em}
+      .intro-skip{padding:9px 13px;font-size:7px;gap:8px}
+    }
   </style>
 </head>
 <body>
   <noscript>
-    <style>[data-anim]{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}.hud{display:none}</style>
+    <style>[data-anim]{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}.hud{display:none}.intro{display:none!important}</style>
   </noscript>
+
+  <div class="intro" id="intro" aria-hidden="true">
+    <canvas class="intro-canvas" id="introScene"></canvas>
+    <div class="intro-vignette"></div>
+    <div class="intro-meta">
+      <span class="intro-brand">nova<sup>®</sup><i>✳</i></span>
+      <span>sistema / 01 — apresentação</span>
+    </div>
+    <div class="intro-words" id="introWords"></div>
+    <div class="intro-foot">
+      <span class="intro-phase" id="introPhase">calibrando órbitas</span>
+      <span class="intro-count"><b id="introCount">00</b> / 100</span>
+      <button class="intro-skip" id="introSkip" type="button">pular <span aria-hidden="true">→</span></button>
+    </div>
+  </div>
+
   <div class="rail" aria-hidden="true"><i id="railFill"></i></div>
   <div class="glow" id="glow" aria-hidden="true"></div>
   <canvas id="scene" aria-hidden="true"></canvas>
@@ -1754,6 +1840,531 @@
       if (!reduced) raf = requestAnimationFrame(loop);
       if (document.fonts?.ready) document.fonts.ready.then(() => { measure(); onScroll(); });
     })();
+  </script>
+
+  <script>
+(() => {
+  'use strict';
+  const intro = document.getElementById('intro');
+  if (!intro) return;
+  const canvas = document.getElementById('introScene');
+  const ctx = canvas && canvas.getContext('2d');
+  if (!ctx) { intro.remove(); return; }
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let seen = false;
+  try { seen = sessionStorage.getItem('nova:intro') === '1'; } catch (e) {}
+  if (reduce || seen) { intro.remove(); return; }
+
+  const root = document.documentElement;
+  root.classList.add('intro-lock');
+
+  const phaseEl = document.getElementById('introPhase');
+  const countEl = document.getElementById('introCount');
+  const wordsEl = document.getElementById('introWords');
+  const skipBtn = document.getElementById('introSkip');
+
+  const TAU = Math.PI * 2;
+  const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+  const APPEAR = 1250;
+  const BOOM = 3500;
+  const FADE = 6300;
+  const END = 7100;
+
+  let w = 0, h = 0, dpr = 1;
+  let bodies = [], stars = [], particles = [], waves = [], words = [];
+  let flash = 0, boomAt = 0, elapsed = 0, prev = 0, raf = 0, finished = false;
+  let px = 0, py = 0, tpx = 0, tpy = 0;
+
+  let seed = 0x4e4f5641;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+  const JUP_COLORS = [
+    'rgba(255,238,212,.22)', 'rgba(148,86,56,.30)', 'rgba(255,246,226,.16)',
+    'rgba(120,66,46,.32)', 'rgba(246,208,170,.22)', 'rgba(170,102,64,.26)'
+  ];
+  const RINGS = [
+    [1.34, 0.045, 'rgba(236,220,186,.24)'],
+    [1.44, 0.07, 'rgba(248,234,200,.40)'],
+    [1.55, 0.035, 'rgba(214,196,160,.28)'],
+    [1.71, 0.11, 'rgba(252,240,210,.48)'],
+    [1.87, 0.06, 'rgba(228,212,176,.36)'],
+    [2.01, 0.045, 'rgba(208,190,152,.24)'],
+    [2.13, 0.028, 'rgba(242,228,198,.20)']
+  ];
+  const WORD_LIST = [
+    ['estratégia', 'big'], ['ruptura', 'acid'], ['órbita', ''],
+    ['design', ''], ['matéria', 'acid'], ['movimento', 'big'],
+    ['tecnologia', ''], ['novo mundo', ''], ['peso', ''], ['silêncio', 'acid']
+  ];
+
+  function layout() {
+    w = innerWidth; h = innerHeight;
+    dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const base = Math.min(w, h);
+    const mobile = w < 720;
+    const jr = Math.max(50, Math.min(base * (mobile ? 0.175 : 0.19), 195));
+    const sr = jr * (mobile ? 0.72 : 0.78);
+
+    bodies = [
+      { key: 'jupiter', cx: w * (mobile ? 0.32 : 0.30), cy: h * (mobile ? 0.35 : 0.46), r: jr, ringed: false, delay: 0, phase: 0.2, pxx: 16, pxy: 10, ax: 0, ay: 0 },
+      { key: 'saturn', cx: w * (mobile ? 0.65 : 0.71), cy: h * (mobile ? 0.62 : 0.56), r: sr, ringed: true, delay: 190, phase: 2.1, pxx: 12, pxy: 8, ax: 0, ay: 0 }
+    ];
+
+    stars = [];
+    for (let i = 0; i < 130; i++) {
+      stars.push({ x: rnd(), y: rnd(), s: 0.4 + rnd() * 1.4, a: 0.16 + rnd() * 0.5, p: rnd() * TAU, sp: 0.4 + rnd() * 1.2 });
+    }
+  }
+
+  function drawBackdrop(t) {
+    const g = ctx.createRadialGradient(w * 0.5, h * 0.42, 0, w * 0.5, h * 0.42, Math.max(w, h) * 0.62);
+    g.addColorStop(0, 'rgba(40,96,70,.18)');
+    g.addColorStop(.55, 'rgba(14,36,28,.08)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    for (const s of stars) {
+      const tw = 0.55 + 0.45 * Math.sin(t * 0.0012 * s.sp + s.p);
+      ctx.fillStyle = 'rgba(214,255,232,' + (s.a * tw).toFixed(3) + ')';
+      ctx.fillRect(s.x * w, s.y * h, s.s, s.s);
+    }
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(140,255,180,.055)';
+    ctx.lineWidth = 1;
+    for (const b of bodies) {
+      ctx.beginPath();
+      ctx.ellipse(b.cx, b.cy, b.r * 2.5, b.r * 0.6, -0.32, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawJupiter(x, y, r, spin) {
+    const glow = ctx.createRadialGradient(x, y, r * 0.72, x, y, r * 1.8);
+    glow.addColorStop(0, 'rgba(228,160,104,.20)');
+    glow.addColorStop(.5, 'rgba(190,112,70,.09)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(x, y, r * 1.8, 0, TAU); ctx.fill();
+
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip();
+
+    const base = ctx.createRadialGradient(x - r * .34, y - r * .42, r * .08, x, y, r * 1.12);
+    base.addColorStop(0, '#f3caa1');
+    base.addColorStop(.42, '#dda576');
+    base.addColorStop(.72, '#b57b53');
+    base.addColorStop(1, '#6a412e');
+    ctx.fillStyle = base;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+
+    for (let i = 0; i < 17; i++) {
+      const yy = -0.94 + i * 0.118;
+      const dy = yy * r + Math.sin(spin * 1.4 + i * 0.8) * r * 0.007;
+      const chord = Math.sqrt(Math.max(0, r * r - dy * dy));
+      ctx.beginPath();
+      ctx.ellipse(x, y + dy, chord + r * 0.02, r * (0.055 + (i % 3) * 0.008), 0, 0, TAU);
+      ctx.fillStyle = JUP_COLORS[i % JUP_COLORS.length];
+      ctx.fill();
+    }
+
+    const sx = x + Math.sin(spin * 0.9) * r * 0.3;
+    ctx.save();
+    ctx.translate(sx, y + r * 0.2);
+    ctx.rotate(-0.18);
+    const spot = ctx.createRadialGradient(0, 0, r * 0.01, 0, 0, r * 0.23);
+    spot.addColorStop(0, 'rgba(206,108,74,.95)');
+    spot.addColorStop(.62, 'rgba(168,80,56,.72)');
+    spot.addColorStop(1, 'rgba(120,60,44,0)');
+    ctx.fillStyle = spot;
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.22, r * 0.115, 0, 0, TAU); ctx.fill();
+    ctx.restore();
+
+    const sh = ctx.createLinearGradient(x - r, y - r * .5, x + r * .95, y + r * .9);
+    sh.addColorStop(0, 'rgba(255,244,222,.18)');
+    sh.addColorStop(.4, 'rgba(0,0,0,0)');
+    sh.addColorStop(.78, 'rgba(6,10,10,.35)');
+    sh.addColorStop(1, 'rgba(3,6,7,.78)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+
+    const rim = ctx.createRadialGradient(x, y, r * .8, x, y, r);
+    rim.addColorStop(0, 'rgba(150,255,170,0)');
+    rim.addColorStop(.82, 'rgba(150,255,170,0)');
+    rim.addColorStop(1, 'rgba(170,255,150,.18)');
+    ctx.fillStyle = rim;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(255,224,190,.14)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x, y, r - .5, 0, TAU); ctx.stroke();
+  }
+
+  function ringHalf(r, a0, a1) {
+    for (const ring of RINGS) {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * ring[0], r * ring[0] * 0.255, 0, a0, a1);
+      ctx.strokeStyle = ring[2];
+      ctx.lineWidth = Math.max(1, r * ring[1]);
+      ctx.stroke();
+    }
+  }
+
+  function drawSaturn(x, y, r, spin) {
+    const tilt = -0.36;
+    const glow = ctx.createRadialGradient(x, y, r * .8, x, y, r * 2.2);
+    glow.addColorStop(0, 'rgba(236,214,160,.14)');
+    glow.addColorStop(.6, 'rgba(180,160,110,.06)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(x, y, r * 2.2, 0, TAU); ctx.fill();
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ringHalf(r, Math.PI, TAU);
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip();
+    const base = ctx.createRadialGradient(x - r * .3, y - r * .4, r * .1, x, y, r * 1.1);
+    base.addColorStop(0, '#fbf0cf');
+    base.addColorStop(.38, '#ecd7a8');
+    base.addColorStop(.72, '#cbb27e');
+    base.addColorStop(1, '#7d6642');
+    ctx.fillStyle = base;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+
+    for (let i = 0; i < 12; i++) {
+      const yy = -0.9 + i * 0.16;
+      const dy = yy * r + Math.sin(spin + i) * r * .005;
+      const chord = Math.sqrt(Math.max(0, r * r - dy * dy));
+      ctx.beginPath();
+      ctx.ellipse(x, y + dy, chord + 1, r * .05, 0, 0, TAU);
+      ctx.fillStyle = i % 2 ? 'rgba(255,248,224,.14)' : 'rgba(150,126,84,.16)';
+      ctx.fill();
+    }
+
+    const sh = ctx.createLinearGradient(x - r, y - r * .5, x + r, y + r);
+    sh.addColorStop(0, 'rgba(255,250,230,.16)');
+    sh.addColorStop(.42, 'rgba(0,0,0,0)');
+    sh.addColorStop(.8, 'rgba(10,12,10,.4)');
+    sh.addColorStop(1, 'rgba(4,6,7,.75)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ringHalf(r, 0, Math.PI);
+    ctx.restore();
+  }
+
+  function drawLabel(b, t) {
+    const p = clamp01((t - b.delay - 520) / 800);
+    if (p <= 0) return;
+    const a = easeOut(p) * (1 - clamp01((t - BOOM) / 300));
+    if (a <= 0) return;
+    const yBase = b.ay + b.r * (b.ringed ? 1.6 : 1.3);
+    ctx.save();
+    ctx.globalAlpha = a * 0.85;
+    ctx.textAlign = 'center';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '3px';
+    ctx.font = '500 9px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillStyle = 'rgba(214,255,232,.78)';
+    ctx.fillText(b.key === 'jupiter' ? 'JÚPITER' : 'SATURNO', b.ax, yBase);
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '1px';
+    ctx.font = '8px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillStyle = 'rgba(170,255,200,.36)';
+    ctx.fillText(b.key === 'jupiter' ? 'gigante gasoso' : 'anéis de gelo', b.ax, yBase + 15);
+    ctx.restore();
+  }
+
+  function spawnBoom(b) {
+    const palette = b.key === 'jupiter'
+      ? ['#ffd6ad', '#eaa878', '#c47c4e', '#8d4d31', '#fff0da']
+      : ['#f6e7c4', '#e0c795', '#b89d68', '#fff8e2', '#a9e6b3'];
+    const n = w < 720 ? 130 : 230;
+    for (let i = 0; i < n; i++) {
+      const a = rnd() * TAU;
+      const rad = b.r * (0.12 + Math.pow(rnd(), 0.6) * 0.92);
+      const sp = 90 + Math.pow(rnd(), 0.45) * 620;
+      particles.push({
+        x: b.ax + Math.cos(a) * rad,
+        y: b.ay + Math.sin(a) * rad,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp - 40,
+        life: 0,
+        max: 700 + rnd() * 950,
+        size: 0.7 + Math.pow(rnd(), 2) * 3.4,
+        drag: 700 + rnd() * 900,
+        col: i % 23 === 0 ? '#b6ff3d' : palette[(rnd() * palette.length) | 0]
+      });
+    }
+    const smokeN = w < 720 ? 16 : 26;
+    for (let i = 0; i < smokeN; i++) {
+      const a = rnd() * TAU;
+      particles.push({
+        x: b.ax + Math.cos(a) * b.r * 0.45,
+        y: b.ay + Math.sin(a) * b.r * 0.45,
+        vx: Math.cos(a) * (26 + rnd() * 78),
+        vy: Math.sin(a) * (26 + rnd() * 78) - 18,
+        life: 0,
+        max: 900 + rnd() * 700,
+        size: 26 + rnd() * 46,
+        col: b.key === 'jupiter' ? 'rgba(214,146,100,' : 'rgba(228,208,162,',
+        smoke: true,
+        drag: 520
+      });
+    }
+    waves.push({ x: b.ax, y: b.ay, r: b.r * 0.7, max: b.r * 2.2, life: 0, dur: 900, core: false });
+    waves.push({ x: b.ax, y: b.ay, r: b.r * 0.6, max: b.r * 2.4, life: 0, dur: 480, core: true });
+    flash = 0.9;
+  }
+
+  function spawnWords() {
+    const groups = [[], []];
+    WORD_LIST.forEach((item, i) => groups[i % 2].push(item));
+    groups.forEach((list, bi) => {
+      const b = bodies[bi];
+      const outward = Math.atan2(b.ay - h / 2, b.ax - w / 2);
+      list.forEach((item, k) => {
+        const el = document.createElement('span');
+        el.className = 'intro-word' + (item[1] ? ' ' + item[1] : '');
+        el.textContent = item[0];
+        wordsEl.appendChild(el);
+        const hw = el.offsetWidth / 2 || 70;
+        const hh = el.offsetHeight / 2 || 10;
+        const dir = outward + (k - (list.length - 1) / 2) * 0.66 + (rnd() - 0.5) * 0.26;
+        const sp = 190 + rnd() * 250;
+        words.push({
+          el,
+          x: b.ax + Math.cos(dir) * b.r * 0.8,
+          y: b.ay + Math.sin(dir) * b.r * 0.8,
+          vx: Math.cos(dir) * sp,
+          vy: Math.sin(dir) * sp - 24,
+          rot: (rnd() - 0.5) * 12,
+          spin: (rnd() - 0.5) * 38,
+          born: elapsed,
+          life: 1900 + rnd() * 1400,
+          hw,
+          hh
+        });
+      });
+    });
+  }
+
+  function updateEffects(dt) {
+    const f = Math.exp(-dt / 900);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life += dt;
+      if (p.life > p.max) { particles.splice(i, 1); continue; }
+      const drag = p.drag ? Math.exp(-dt / p.drag) : f;
+      p.vx *= drag;
+      p.vy = p.vy * drag + (p.smoke ? -4 : 12) * (dt / 1000);
+      p.x += p.vx * (dt / 1000);
+      p.y += p.vy * (dt / 1000);
+    }
+    for (let i = waves.length - 1; i >= 0; i--) {
+      const wv = waves[i];
+      wv.life += dt;
+      if (wv.life > wv.dur) waves.splice(i, 1);
+    }
+    for (let i = words.length - 1; i >= 0; i--) {
+      const wd = words[i];
+      wd.x += wd.vx * (dt / 1000);
+      wd.y += wd.vy * (dt / 1000);
+      wd.vx *= Math.exp(-dt / 950);
+      wd.vy *= Math.exp(-dt / 1100);
+      wd.rot += wd.spin * (dt / 1000);
+      const mx = wd.hw + 34, top = 98, bottom = 96;
+      const my = Math.max(top, wd.hh + 28);
+      if (wd.x < mx && wd.vx < 0) { wd.x = mx; wd.vx *= -0.45; }
+      else if (wd.x > w - mx && wd.vx > 0) { wd.x = w - mx; wd.vx *= -0.45; }
+      if (wd.y < my && wd.vy < 0) { wd.y = my; wd.vy *= -0.45; }
+      else if (wd.y > h - Math.max(bottom, wd.hh + 28) && wd.vy > 0) { wd.y = h - Math.max(bottom, wd.hh + 28); wd.vy *= -0.45; }
+      const age = elapsed - wd.born;
+      const a = Math.min(clamp01(age / 150), clamp01((wd.life - age) / 900));
+      wd.el.style.opacity = a.toFixed(3);
+      const s = lerp(0.94, 1.03, clamp01(age / 1200));
+      wd.el.style.transform = 'translate(-50%,-50%) translate3d(' + wd.x.toFixed(1) + 'px,' + wd.y.toFixed(1) + 'px,0) rotate(' + wd.rot.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
+    }
+  }
+
+  function drawEffects(dt) {
+    for (const p of particles) {
+      if (!p.smoke) continue;
+      const a = clamp01(1 - p.life / p.max) * 0.16;
+      const rad = p.size * (1 + (p.life / p.max) * 1.9);
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+      g.addColorStop(0, p.col + a.toFixed(3) + ')');
+      g.addColorStop(1, p.col + '0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, rad, 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    for (const p of particles) {
+      if (p.smoke) continue;
+      const a = clamp01(1 - p.life / p.max);
+      ctx.globalAlpha = a * 0.8;
+      ctx.strokeStyle = p.col;
+      ctx.lineWidth = p.size;
+      ctx.beginPath();
+      ctx.moveTo(p.x - p.vx * 0.018, p.y - p.vy * 0.018);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = p.col;
+      ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    for (const wv of waves) {
+      const k = clamp01(wv.life / wv.dur);
+      const rr = lerp(wv.r, wv.max, easeOut(k));
+      if (wv.core) {
+        const g = ctx.createRadialGradient(wv.x, wv.y, 0, wv.x, wv.y, Math.max(1, rr));
+        g.addColorStop(0, 'rgba(228,255,236,' + (0.42 * (1 - k) * (1 - k)).toFixed(3) + ')');
+        g.addColorStop(.35, 'rgba(150,255,196,' + (0.22 * (1 - k)).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(wv.x, wv.y, Math.max(1, rr), 0, TAU);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(wv.x, wv.y, rr, 0, TAU);
+        ctx.strokeStyle = 'rgba(168,255,200,' + (0.34 * (1 - k) * (1 - k)).toFixed(3) + ')';
+        ctx.lineWidth = lerp(2.6, 0.5, k);
+        ctx.stroke();
+      }
+    }
+
+    if (flash > 0.002) {
+      ctx.fillStyle = 'rgba(196,255,214,' + (flash * 0.26).toFixed(3) + ')';
+      ctx.fillRect(0, 0, w, h);
+      flash *= Math.pow(0.82, dt / 16.667);
+    }
+  }
+
+  function setPhase(txt) {
+    if (phaseEl && phaseEl.textContent !== txt) phaseEl.textContent = txt;
+  }
+
+  function frame(now) {
+    if (finished) return;
+    raf = requestAnimationFrame(frame);
+    if (!prev) prev = now;
+    const dt = Math.min(60, now - prev);
+    prev = now;
+    if (document.hidden) return;
+    elapsed += dt;
+    const t = elapsed;
+
+    const move = 1 - Math.exp(-dt / 220);
+    px += (tpx - px) * move;
+    py += (tpy - py) * move;
+
+    ctx.clearRect(0, 0, w, h);
+    drawBackdrop(t);
+
+    const dying = boomAt ? clamp01((t - boomAt) / 210) : 0;
+
+    for (const b of bodies) {
+      const p = clamp01((t - b.delay) / APPEAR * 1.15);
+      if (p <= 0) continue;
+      const e = easeOut(p);
+      const fl = Math.sin(t / 900 + b.phase) * 9;
+      b.ax = b.cx + px * b.pxx + fl * 0.25;
+      b.ay = b.cy + py * b.pxy + fl;
+      const scale = lerp(0.84, 1, e) * lerp(1, 1.12, dying);
+      const alpha = e * (1 - dying);
+      if (alpha > 0.002) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(b.ax, b.ay);
+        ctx.scale(scale, scale);
+        const spin = t * 0.00016 + b.phase;
+        if (b.ringed) drawSaturn(0, 0, b.r, spin);
+        else drawJupiter(0, 0, b.r, spin);
+        ctx.restore();
+      }
+      drawLabel(b, t);
+    }
+
+    if (!boomAt && t >= BOOM) {
+      boomAt = t;
+      for (const b of bodies) spawnBoom(b);
+      spawnWords();
+      try {
+        if (window.Sound) { Sound.wake(); Sound.boom(); }
+      } catch (e) {}
+    }
+
+    updateEffects(dt);
+    drawEffects(dt);
+
+    if (countEl) countEl.textContent = String(Math.min(100, Math.round(clamp01(t / END) * 100))).padStart(2, '0');
+    if (t < 900) setPhase('calibrando órbitas');
+    else if (t < BOOM) setPhase('júpiter · saturno');
+    else if (t < BOOM + 900) setPhase('colapso gravitacional');
+    else if (t < FADE) setPhase('reorganizando matéria');
+    else setPhase('novo mundo');
+
+    if (t >= FADE) intro.classList.add('is-out');
+    if (t >= END) finish();
+  }
+
+  function onPointer(e) {
+    tpx = (e.clientX / innerWidth - 0.5) * 2;
+    tpy = (e.clientY / innerHeight - 0.5) * 2;
+  }
+
+  function onKey(e) {
+    if (e.key === 'Escape') finish();
+  }
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    cancelAnimationFrame(raf);
+    intro.classList.add('is-out');
+    root.classList.remove('intro-lock');
+    try { sessionStorage.setItem('nova:intro', '1'); } catch (e) {}
+    removeEventListener('pointermove', onPointer);
+    removeEventListener('keydown', onKey);
+    if (skipBtn) skipBtn.removeEventListener('click', finish);
+    setTimeout(() => { if (intro.parentNode) intro.remove(); }, 900);
+  }
+
+  layout();
+  addEventListener('resize', layout, { passive: true });
+  addEventListener('pointermove', onPointer, { passive: true });
+  addEventListener('keydown', onKey);
+  if (skipBtn) skipBtn.addEventListener('click', finish);
+  addEventListener('error', () => { if (!finished) finish(); }, { once: true });
+  setTimeout(() => { if (!finished) finish(); }, 9500);
+
+  raf = requestAnimationFrame(frame);
+})();
   </script>
 </body>
 </html>
