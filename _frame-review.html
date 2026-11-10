@@ -1,0 +1,1408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070b">
+  <meta name="description" content="NOVA — estúdio criativo independente. Estratégia, design e tecnologia para marcas fora de órbita.">
+  <title>NOVA® — Fora de órbita.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       01. BASE
+       ============================================================ */
+    :root{
+      --bg:#07070b;
+      --bg-soft:#0b0b11;
+      --ink:#f4f2ec;
+      --muted:#a09daa;
+      --muted-dim:#76737f;
+      --acid:#c9ff4d;
+      --line:rgba(255,255,255,.14);
+      --line-soft:rgba(255,255,255,.07);
+      --mono:'DM Mono','Courier New',monospace;
+      --sans:'Space Grotesk',system-ui,-apple-system,sans-serif;
+      --pad:clamp(20px,4vw,64px);
+      --ease:cubic-bezier(.16,1,.3,1);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{
+      margin:0;min-height:100%;
+      background:var(--bg);color:var(--ink);
+      font-family:var(--sans);font-size:16px;line-height:1.5;
+      overflow-x:hidden;-webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--acid);color:var(--bg)}
+    a{color:inherit;text-decoration:none}
+    ul,ol{margin:0;padding:0;list-style:none}
+    :focus-visible{outline:1px solid var(--acid);outline-offset:5px}
+
+    /* ============================================================
+       02. CENA 3D (fixa, à direita)
+       ============================================================ */
+    #scene{
+      position:fixed;inset:0;width:100%;height:100%;
+      z-index:0;pointer-events:none;display:block;
+    }
+    .veil{
+      position:fixed;inset:0;z-index:1;pointer-events:none;
+      background:
+        radial-gradient(120% 90% at 14% 8%,rgba(7,7,11,.9),rgba(7,7,11,.4) 46%,transparent 68%),
+        linear-gradient(90deg,var(--bg) 0%,rgba(7,7,11,.94) 32%,rgba(7,7,11,.4) 54%,rgba(7,7,11,0) 72%),
+        linear-gradient(0deg,rgba(7,7,11,.72),transparent 24%);
+    }
+    .grain{
+      position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.055;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.93' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+    }
+
+    /* ============================================================
+       03. ESTRUTURA
+       ============================================================ */
+    .site{position:relative;z-index:2}
+    .col{
+      width:min(590px,calc(52vw - var(--pad)));
+      margin-left:max(var(--pad),calc((100vw - 1440px)/2));
+    }
+    .section{padding:clamp(72px,8vw,120px) 0;border-top:1px solid var(--line-soft)}
+    section[id]{scroll-margin-top:96px}
+
+    /* topo fixo */
+    .top{
+      position:fixed;inset:0 0 auto;z-index:5;
+      display:flex;align-items:center;justify-content:space-between;gap:24px;
+      padding:20px max(var(--pad),calc((100vw - 1440px)/2));
+      border-bottom:1px solid transparent;
+      transition:background .35s ease,border-color .35s ease,backdrop-filter .35s ease;
+    }
+    .top.scrolled{
+      background:rgba(7,7,11,.92);backdrop-filter:blur(18px) saturate(120%);
+      border-bottom-color:var(--line-soft);
+    }
+    .brand{
+      display:inline-flex;align-items:baseline;gap:2px;
+      font-size:22px;font-weight:700;letter-spacing:-1.4px;line-height:1;
+    }
+    .brand sup{font-size:9px;color:var(--acid);letter-spacing:0;transform:translateY(-6px)}
+    .brand .spark{
+      display:inline-block;margin-left:8px;color:var(--acid);font-size:13px;
+      animation:sparkSpin 14s linear infinite;
+    }
+    @keyframes sparkSpin{to{transform:rotate(360deg)}}
+    .nav{display:flex;align-items:center;gap:clamp(18px,2.4vw,34px);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+    .nav a{position:relative;color:#cdc9d6;padding:6px 0;transition:color .25s ease}
+    .nav a::after{
+      content:'';position:absolute;left:0;right:0;bottom:0;height:1px;
+      background:var(--acid);transform:scaleX(0);transform-origin:left;
+      transition:transform .4s var(--ease);
+    }
+    .nav a:hover,.nav a.active{color:var(--acid)}
+    .nav a:hover::after,.nav a.active::after{transform:scaleX(1)}
+    .nav .avail{display:none}
+    @media(min-width:1180px){.nav .avail{display:inline-flex;align-items:center;gap:8px}}
+    .nav .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 12px var(--acid);animation:pulse 2.4s ease-in-out infinite}
+    @keyframes pulse{50%{opacity:.35;box-shadow:0 0 3px var(--acid)}}
+
+    /* ============================================================
+       04. ANIMAÇÕES DE ENTRADA
+       ============================================================ */
+    [data-anim]{
+      opacity:0;transform:translateY(22px);filter:blur(6px);
+      transition:
+        opacity .85s var(--ease) var(--d,0ms),
+        transform .85s var(--ease) var(--d,0ms),
+        filter .85s var(--ease) var(--d,0ms);
+    }
+    [data-anim].in{opacity:1;transform:none;filter:none}
+    [data-anim="wipe"]{transform:translateY(0);clip-path:inset(0 100% 0 0);transition:clip-path 1s var(--ease) var(--d,0ms)}
+    [data-anim="wipe"].in{clip-path:inset(0 0 0 0)}
+
+    /* ============================================================
+       05. HERO
+       ============================================================ */
+    .hero{
+      min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+      padding:148px 0 84px;border-top:0;
+    }
+    .eyebrow{
+      display:flex;align-items:center;gap:14px;margin:0 0 26px;
+      font-family:var(--mono);font-size:10px;line-height:1.4;
+      letter-spacing:.18em;text-transform:uppercase;color:var(--acid);
+    }
+    .eyebrow::before{content:'';width:34px;height:1px;background:currentColor;opacity:.75;flex:none}
+    h1{
+      margin:0;font-weight:600;text-transform:uppercase;
+      font-size:clamp(50px,6.3vw,90px);line-height:.85;letter-spacing:-.055em;
+    }
+    h1 .line{display:block}
+    h1 .outline{color:transparent;-webkit-text-stroke:1px rgba(244,242,236,.85)}
+    .lede{margin:28px 0 0;max-width:410px;color:#bab7c2;font-size:clamp(14px,1.15vw,16px);line-height:1.72}
+    .lede strong{color:var(--ink);font-weight:500}
+    .actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:34px}
+    .btn{
+      display:inline-flex;align-items:center;gap:26px;
+      height:50px;padding:0 20px;border:1px solid rgba(244,242,236,.5);border-radius:2px;
+      font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+      transition:background .3s ease,color .3s ease,border-color .3s ease;
+    }
+    .btn .arrow{font-size:14px;transition:transform .35s var(--ease)}
+    .btn:hover{background:var(--acid);color:var(--bg);border-color:var(--acid)}
+    .btn:hover .arrow{transform:translate(4px,4px)}
+    .hint{
+      display:inline-flex;align-items:center;gap:9px;
+      font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-dim);
+    }
+    .hint i{font-style:normal;display:inline-block;animation:bob 2.2s ease-in-out infinite}
+    @keyframes bob{50%{transform:translateY(5px)}}
+    .stats{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;
+      margin:clamp(40px,6vh,70px) 0 0;padding-top:22px;border-top:1px solid var(--line);
+    }
+    .stats>div{transition:transform .4s var(--ease)}
+    .stats>div:hover{transform:translateY(-4px)}
+    .stats dt{font-size:clamp(20px,2vw,27px);font-weight:500;letter-spacing:-.03em;line-height:1}
+    .stats dd{margin:8px 0 0;font-family:var(--mono);font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted-dim)}
+
+    /* ticker */
+    .ticker{overflow:hidden;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:13px 0;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+    .ticker ul{display:flex;width:max-content;animation:marquee 34s linear infinite}
+    .ticker li{
+      display:inline-flex;align-items:center;gap:22px;padding:0 22px;
+      font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#918e9b;
+    }
+    .ticker li::before{content:'✳';color:var(--acid);font-size:10px}
+    @keyframes marquee{to{transform:translateX(-50%)}}
+
+    /* ============================================================
+       06. SEÇÕES
+       ============================================================ */
+    .head{
+      position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;
+      padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:clamp(28px,4vw,44px);
+    }
+    .head::after{
+      content:'';position:absolute;left:0;bottom:-1px;height:1px;width:34%;
+      background:var(--acid);transform:scaleX(0);transform-origin:left;
+      transition:transform 1.1s var(--ease) .12s;
+    }
+    .head.in::after{transform:scaleX(1)}
+    .head span{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+    .head span:first-child{color:var(--acid)}
+    .head span:last-child{color:var(--muted-dim);text-align:right}
+    h2{
+      margin:0;font-weight:500;letter-spacing:-.055em;line-height:.96;
+      font-size:clamp(36px,4.6vw,62px);
+    }
+    h2 em{font-style:normal;color:var(--acid)}
+    .body-copy{margin:26px 0 0;max-width:430px;color:var(--muted);font-size:14px;line-height:1.8}
+    .body-copy strong{color:var(--ink);font-weight:500}
+
+    /* projetos */
+    .projects{padding-top:4px}
+    .project{
+      position:relative;display:grid;grid-template-columns:32px minmax(0,1fr) auto;
+      align-items:center;gap:16px;padding:22px 0;
+      border-bottom:1px solid var(--line-soft);
+      transition:border-color .35s ease;
+    }
+    .project::before{
+      content:'';position:absolute;inset:0 -14px;background:rgba(201,255,77,.045);
+      opacity:0;transform:scaleX(.96);transform-origin:left;
+      transition:opacity .35s ease,transform .45s var(--ease);pointer-events:none;
+    }
+    .project:hover::before{opacity:1;transform:scaleX(1)}
+    .project:hover{border-color:rgba(201,255,77,.35)}
+    .project .num{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--acid)}
+    .project .name{
+      font-size:clamp(22px,2.5vw,34px);font-weight:500;letter-spacing:-.04em;line-height:1.1;
+      transition:transform .45s var(--ease),color .35s ease;
+    }
+    .project:hover .name{transform:translateX(8px);color:var(--acid)}
+    .project .meta{font-family:var(--mono);font-size:8.5px;line-height:1.9;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dim);text-align:right}
+    .project .meta b{display:block;color:var(--muted);font-weight:400}
+    .project .go{
+      display:inline-block;margin-left:10px;color:var(--acid);
+      opacity:0;transform:translate(-6px,6px);transition:opacity .3s ease,transform .4s var(--ease);
+    }
+    .project:hover .go,.project:focus-visible .go{opacity:1;transform:none}
+
+    /* manifesto */
+    .quote{margin:0;font-weight:500;font-size:clamp(28px,3.6vw,46px);line-height:1.12;letter-spacing:-.05em}
+    .quote span{display:block}
+    .quote .acid{color:var(--acid)}
+    .quote .dim{color:var(--muted-dim)}
+
+    /* contato */
+    .contact-link{
+      display:inline-flex;align-items:flex-start;gap:14px;
+      margin-top:8px;font-size:clamp(26px,3.4vw,44px);font-weight:500;
+      letter-spacing:-.05em;line-height:1.1;transition:color .3s ease;
+    }
+    .contact-link span:last-child{font-size:.6em;color:var(--acid);transition:transform .4s var(--ease)}
+    .contact-link:hover{color:var(--acid)}
+    .contact-link:hover span:last-child{transform:translate(6px,-6px)}
+    .contact-meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:34px}
+    .contact-meta a{
+      font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+      color:var(--muted);padding-bottom:3px;border-bottom:1px solid var(--line);
+      transition:color .25s ease,border-color .25s ease;
+    }
+    .contact-meta a:hover{color:var(--acid);border-color:var(--acid)}
+
+    footer{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      padding:26px 0 100px;border-top:1px solid var(--line-soft);
+      font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dim);
+    }
+    footer .to-top{transition:color .25s ease}
+    footer .to-top:hover{color:var(--acid)}
+
+    /* ============================================================
+       06b. COMPONENTES: PROCESSO, REPERTÓRIO, DEPOIMENTO
+       ============================================================ */
+    .steps{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+      margin:34px 0 0;border-top:1px solid var(--line-soft);border-left:1px solid var(--line-soft);
+    }
+    .steps li{
+      position:relative;padding:19px 18px 23px;overflow:hidden;
+      border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+      transition:background .4s ease;
+    }
+    .steps li:hover{background:rgba(201,255,77,.05)}
+    .steps .n{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--acid)}
+    .steps h3{margin:10px 0 6px;font-size:16px;font-weight:500;letter-spacing:-.02em}
+    .steps p{margin:0;font-size:11.5px;line-height:1.65;color:var(--muted)}
+    .steps .fill{
+      position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--acid);
+      transform:scaleX(0);transform-origin:left;
+      transition:transform 1.2s var(--ease) .2s;
+    }
+    .steps li.in .fill{transform:scaleX(1)}
+
+    .clients{margin:30px 0 0;border-top:1px solid var(--line-soft)}
+    .clients li{
+      display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:center;
+      padding:13px 0;border-bottom:1px solid var(--line-soft);
+      font-size:15px;letter-spacing:-.01em;
+      transition:color .3s ease,padding-left .4s var(--ease);
+    }
+    .clients li:hover{color:var(--acid);padding-left:8px}
+    .clients .n{font-family:var(--mono);font-size:8.5px;color:var(--muted-dim)}
+    .clients b{font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:.1em;color:var(--muted-dim)}
+
+    .testimonial{margin:6px 0 0;border-left:1px solid var(--acid);padding-left:clamp(18px,2.4vw,26px)}
+    .testimonial p{margin:0;font-size:clamp(19px,2.1vw,26px);line-height:1.4;letter-spacing:-.03em}
+    .testimonial .who{margin:22px 0 0;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dim);line-height:1.8}
+    .testimonial .who b{display:block;color:var(--ink);font-weight:500;letter-spacing:.08em}
+
+    /* ============================================================
+       06c. SOM, PROGRESSO E BRILHO DO CURSOR
+       ============================================================ */
+    .rail{position:fixed;top:0;left:0;right:0;height:2px;z-index:7;pointer-events:none;background:rgba(255,255,255,.06)}
+    .rail i{display:block;height:100%;background:var(--acid);box-shadow:0 0 12px var(--acid);transform:scaleX(0);transform-origin:left center;will-change:transform}
+
+    .glow{
+      position:fixed;left:0;top:0;width:460px;height:460px;margin:-230px 0 0 -230px;
+      border-radius:50%;pointer-events:none;z-index:1;opacity:0;will-change:transform;
+      background:radial-gradient(circle,rgba(201,255,77,.10),rgba(201,255,77,.035) 46%,transparent 70%);
+      transition:opacity .6s ease;
+    }
+    @media(pointer:fine){.glow{opacity:1}}
+
+    .sound{
+      display:inline-flex;align-items:center;gap:8px;
+      background:none;border:1px solid var(--line);border-radius:2px;color:#cdc9d6;
+      font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+      padding:7px 10px;cursor:pointer;
+      transition:color .25s ease,border-color .25s ease,background .25s ease;
+    }
+    .sound:hover{color:var(--acid);border-color:rgba(201,255,77,.6);background:rgba(201,255,77,.06)}
+    .sound .bars{display:inline-flex;align-items:flex-end;gap:2px;height:10px}
+    .sound .bars i{display:block;width:2px;height:100%;background:currentColor;transform-origin:bottom;animation:eq 1s ease-in-out infinite}
+    .sound .bars i:nth-child(2){animation-delay:.16s}
+    .sound .bars i:nth-child(3){animation-delay:.32s}
+    @keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+    .sound[aria-pressed="false"]{color:var(--muted-dim)}
+    .sound[aria-pressed="false"] .bars i{animation:none;transform:scaleY(.3)}
+
+    .btn{transition:background .3s ease,color .3s ease,border-color .3s ease,transform .2s ease-out}
+
+    /* ============================================================
+       07. HUD DA CENA (canto inferior direito)
+       ============================================================ */
+    .hud{
+      position:fixed;z-index:4;pointer-events:none;
+      right:max(var(--pad),calc((100vw - 1440px)/2));
+      bottom:clamp(20px,3.4vh,34px);
+      width:210px;text-align:right;
+    }
+    .hud-frame{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-dim)}
+    .hud-frame b{color:var(--acid);font-weight:500}
+    .hud-stage{
+      margin:9px 0 0;font-size:17px;font-weight:500;letter-spacing:-.02em;line-height:1;
+      text-transform:uppercase;
+    }
+    .hud-caption{margin:9px 0 14px;font-family:var(--mono);font-size:8.5px;line-height:1.6;letter-spacing:.06em;color:var(--muted-dim)}
+    .hud-bar{position:relative;height:2px;background:rgba(255,255,255,.16);overflow:hidden}
+    .hud-bar::after{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(7,7,11,.9) calc(25% - 1px) 25%);
+    }
+    .hud-bar i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left center;background:var(--acid);box-shadow:0 0 10px var(--acid);will-change:transform}
+    .hud-coord{
+      position:fixed;z-index:4;pointer-events:none;top:82px;
+      right:max(var(--pad),calc((100vw - 1440px)/2));
+      font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+      color:rgba(255,255,255,.28);writing-mode:vertical-rl;
+    }
+
+    /* ============================================================
+       08. RESPONSIVO
+       ============================================================ */
+    @media(max-width:980px){
+      .col{width:auto;margin-inline:var(--pad)}
+      .hero{min-height:92svh;padding:120px 0 56px}
+      .veil{
+        background:
+          linear-gradient(180deg,rgba(7,7,11,.18),rgba(7,7,11,.58) 38%,rgba(7,7,11,.92) 72%,var(--bg) 94%),
+          linear-gradient(90deg,var(--bg) 0%,rgba(7,7,11,.5) 38%,transparent 80%);
+      }
+      /* HUD vira uma barra de status compacta no rodapé */
+      .hud{
+        left:0;right:0;bottom:0;width:auto;text-align:left;
+        padding:9px var(--pad) 10px;
+        background:linear-gradient(180deg,rgba(7,7,11,.72),rgba(7,7,11,.985) 55%);
+        border-top:1px solid var(--line-soft);
+        backdrop-filter:blur(16px);
+      }
+      .hud-frame{display:inline-block;font-size:8px}
+      .hud-stage{display:inline-block;margin:0 0 0 12px;font-size:12px;letter-spacing:0}
+      .hud-caption{display:none}
+      .hud-bar{margin-top:7px;height:2px}
+      .hud-coord{display:none}
+      footer{padding-bottom:84px}
+    }
+    @media(max-width:640px){
+      .nav{gap:12px;font-size:8.5px;letter-spacing:.1em}
+      h1{font-size:clamp(46px,13vw,74px)}
+      .stats{gap:10px}
+      .stats dd{font-size:8px;letter-spacing:.1em}
+      .project{grid-template-columns:24px minmax(0,1fr);padding:18px 0}
+      .project .meta{display:none}
+      .project .go{opacity:1;transform:none}
+      .btn{height:46px;gap:18px;font-size:9.5px}
+      .head span:last-child{display:none}
+    }
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+      [data-anim]{opacity:1;transform:none;filter:none;clip-path:none}
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <style>[data-anim]{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}.hud{display:none}</style>
+  </noscript>
+  <div class="rail" aria-hidden="true"><i id="railFill"></i></div>
+  <div class="glow" id="glow" aria-hidden="true"></div>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top" id="topbar">
+    <a class="brand" href="#inicio" aria-label="NOVA, voltar ao início">
+      nova<sup>®</sup><span class="spark" aria-hidden="true">✳</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#estudio">Estúdio</a>
+      <a href="#projetos">Projetos</a>
+      <a href="#contato">Contato ↗</a>
+      <span class="avail"><span class="dot"></span> Disponível</span>
+      <button class="sound" id="sound" type="button" aria-pressed="true" aria-label="Ligar ou desligar o som">
+        <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="label">Som</span>
+      </button>
+    </nav>
+  </header>
+
+  <div class="site">
+    <main>
+      <!-- FRAME 01 -->
+      <section class="hero col" id="inicio" data-frame="0" data-label="Formação" data-caption="Tudo começa com uma faísca.">
+        <p class="eyebrow" data-anim>Estúdio criativo independente · Brasil</p>
+        <h1>
+          <span class="line" data-anim>Fora</span>
+          <span class="line outline" data-anim>de órbita.</span>
+        </h1>
+        <p class="lede" data-anim>A gente transforma ideias <strong>impossíveis</strong> em marcas que ninguém consegue ignorar.</p>
+        <div class="actions" data-anim>
+          <a class="btn" href="#projetos">Descubra o estúdio <span class="arrow" aria-hidden="true">↘</span></a>
+          <span class="hint">Role para explorar <i aria-hidden="true">↓</i></span>
+        </div>
+        <dl class="stats">
+          <div data-anim><dt><span data-count="12">0</span></dt><dd>Anos em órbita</dd></div>
+          <div data-anim><dt><span data-count="48">0</span>+</dt><dd>Marcas lançadas</dd></div>
+          <div data-anim><dt><span data-count="9">0</span></dt><dd>Prêmios</dd></div>
+        </dl>
+      </section>
+
+      <div class="ticker col" aria-hidden="true">
+        <ul>
+          <li>Identidade visual</li><li>Direção de arte</li><li>Experiências digitais</li><li>Estratégia de marca</li>
+          <li>Identidade visual</li><li>Direção de arte</li><li>Experiências digitais</li><li>Estratégia de marca</li>
+        </ul>
+      </div>
+
+      <!-- FRAME 02 -->
+      <section class="section col" id="estudio" data-frame="1" data-label="Órbita" data-caption="Os fragmentos encontram seu lugar.">
+        <div class="head" data-anim>
+          <span>01 — Quem somos</span>
+          <span>Ideias grandes. Ego pequeno.</span>
+        </div>
+        <h2 data-anim>Não fazemos mais do <em>mesmo.</em><br>Fazemos acontecer.</h2>
+        <p class="body-copy" data-anim>Um estúdio independente para marcas com vontade de romper a superfície. Misturamos <strong>estratégia, design e tecnologia</strong> para construir coisas que deixam marca.</p>
+      </section>
+
+      <!-- FRAME 03 -->
+      <section class="section col" id="processo" data-frame="2" data-label="Fragmentação" data-caption="A ideia se rompe em mil possibilidades.">
+        <div class="head" data-anim>
+          <span>02 — Como pensamos</span>
+          <span>Quatro movimentos ↘</span>
+        </div>
+        <h2 data-anim>Quebramos o óbvio<br>em <em>pedaços</em> melhores.</h2>
+        <ol class="steps">
+          <li data-anim><span class="n">01</span><h3>Escuta</h3><p>Ouvimos antes de desenhar. Contexto, tensão, desejo.</p><span class="fill"></span></li>
+          <li data-anim><span class="n">02</span><h3>Fragmentação</h3><p>Desmontamos o problema até achar o que ninguém viu.</p><span class="fill"></span></li>
+          <li data-anim><span class="n">03</span><h3>Colagem</h3><p>Juntamos referências improváveis até fazer sentido.</p><span class="fill"></span></li>
+          <li data-anim><span class="n">04</span><h3>Lançamento</h3><p>Colocamos no mundo com precisão e barulho.</p><span class="fill"></span></li>
+        </ol>
+      </section>
+
+      <!-- FRAME 04 -->
+      <section class="section col" id="repertorio" data-frame="3" data-label="Giro" data-caption="Tudo gira em torno de uma obsessão.">
+        <div class="head" data-anim>
+          <span>03 — Repertório</span>
+          <span>Onde já estivemos</span>
+        </div>
+        <h2 data-anim>Marcas que aceitaram<br>sair do <em>lugar-comum.</em></h2>
+        <ul class="clients">
+          <li data-anim><span class="n">01</span>Outra Frequência<b>2025</b></li>
+          <li data-anim><span class="n">02</span>Futuro Comestível<b>2024</b></li>
+          <li data-anim><span class="n">03</span>Clube do Infinito<b>2024</b></li>
+          <li data-anim><span class="n">04</span>Instituto Horizonte<b>2023</b></li>
+          <li data-anim><span class="n">05</span>Casa Nômade<b>2023</b></li>
+          <li data-anim><span class="n">06</span>Água Viva<b>2022</b></li>
+        </ul>
+      </section>
+
+      <!-- FRAME 05 -->
+      <section class="section col" id="projetos" data-frame="4" data-label="Explosão" data-caption="A matéria se espalha pelo universo.">
+        <div class="head" data-anim>
+          <span>04 — Feito para marcar</span>
+          <span>Uma amostra do universo ↘</span>
+        </div>
+        <div class="projects">
+          <a class="project" href="#contato" data-anim>
+            <span class="num">01</span>
+            <span class="name">Outra Frequência <span class="go" aria-hidden="true">↗</span></span>
+            <span class="meta"><b>Música / Cultura</b>Identidade</span>
+          </a>
+          <a class="project" href="#contato" data-anim>
+            <span class="num">02</span>
+            <span class="name">Futuro Comestível <span class="go" aria-hidden="true">↗</span></span>
+            <span class="meta"><b>Foodtech / Impacto</b>Estratégia</span>
+          </a>
+          <a class="project" href="#contato" data-anim>
+            <span class="num">03</span>
+            <span class="name">Clube do Infinito <span class="go" aria-hidden="true">↗</span></span>
+            <span class="meta"><b>Arte / Comunidade</b>Digital</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- FRAME 06 -->
+      <section class="section col" id="manifesto" data-frame="5" data-label="Reconstrução" data-caption="O caos começa a formar outro mundo.">
+        <blockquote class="quote">
+          <span data-anim>O futuro não</span>
+          <span data-anim>se espera. Se</span>
+          <span data-anim class="acid">desenha, constrói</span>
+          <span data-anim class="dim">e coloca no mundo.</span>
+        </blockquote>
+      </section>
+
+      <!-- FRAME 07 -->
+      <section class="section col" id="depoimento" data-frame="6" data-label="Colagem" data-caption="As partes se juntam de um jeito novo.">
+        <div class="head" data-anim>
+          <span>05 — Na voz deles</span>
+          <span>Quem já entrou em órbita</span>
+        </div>
+        <blockquote class="testimonial" data-anim>
+          <p>“A NOVA não entregou um logo. Entregou uma forma de ver a marca que a gente não sabia explicar.”</p>
+          <p class="who"><b>Marina Reis</b>Diretora criativa · Outra Frequência</p>
+        </blockquote>
+      </section>
+
+      <!-- FRAME 08 -->
+      <section class="section col" id="contato" data-frame="7" data-label="Novo mundo" data-caption="Uma nova ideia entra em órbita.">
+        <div class="head" data-anim>
+          <span>06 — Sua vez</span>
+          <span>Vamos começar algo grande</span>
+        </div>
+        <a class="contact-link" href="mailto:oi@nova.studio" data-anim>
+          <span>Tem um universo<br>na cabeça?</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+        <div class="contact-meta" data-anim>
+          <a href="mailto:oi@nova.studio">oi@nova.studio</a>
+          <a href="#inicio">Instagram</a>
+          <a href="#inicio">LinkedIn</a>
+          <a href="#inicio">Behance</a>
+        </div>
+        <footer>
+          <span>© Nova® Estúdio independente · Feito no Brasil</span>
+          <a class="to-top" href="#inicio">Voltar ao topo ↑</a>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <aside class="hud" aria-hidden="true">
+    <div class="hud-frame">Frame <b id="hudIndex">01</b> / <span id="hudTotal">05</span></div>
+    <p class="hud-stage" id="hudStage">Formação</p>
+    <p class="hud-caption" id="hudCaption">Tudo começa com uma faísca.</p>
+    <div class="hud-bar"><i id="hudFill"></i></div>
+  </aside>
+  <span class="hud-coord" aria-hidden="true">Nova / Sistema criativo — 03° 17′ N</span>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+      const smooth = t => t * t * (3 - 2 * t);
+
+      /* ==========================================================
+         0. SOM SINTETIZADO (Web Audio, sem arquivos externos)
+         ========================================================== */
+      const Sound = (() => {
+        let ctx = null;
+        let master = null;
+        let noiseBuffer = null;
+        let enabled = true;
+        try { enabled = localStorage.getItem('nova:sound') !== 'off'; } catch {}
+
+        const SCALE = [196, 220, 246.94, 293.66, 329.63, 392, 440, 493.88];
+
+        function ensure() {
+          if (ctx) return ctx;
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          ctx = new AC();
+          master = ctx.createGain();
+          master.gain.value = 0.85;
+          const compressor = ctx.createDynamicsCompressor();
+          master.connect(compressor);
+          compressor.connect(ctx.destination);
+
+          const length = Math.floor(ctx.sampleRate * 0.7);
+          noiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
+          const data = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+          return ctx;
+        }
+
+        function wake() {
+          if (!enabled) return;
+          const c = ensure();
+          if (c && c.state === 'suspended') c.resume();
+        }
+
+        function tone(freq, opts = {}) {
+          if (!enabled) return;
+          const c = ensure();
+          if (!c || c.state !== 'running') return;
+          const {
+            dur = 0.16, type = 'sine', vol = 0.045,
+            glide = 1, delay = 0, cutoff = 2800
+          } = opts;
+          const t0 = c.currentTime + delay;
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          const filter = c.createBiquadFilter();
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, t0);
+          if (glide !== 1) osc.frequency.exponentialRampToValueAtTime(Math.max(30, freq * glide), t0 + dur);
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(cutoff, t0);
+          gain.gain.setValueAtTime(0.0001, t0);
+          gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(master);
+          osc.start(t0);
+          osc.stop(t0 + dur + 0.03);
+        }
+
+        function air(opts = {}) {
+          if (!enabled) return;
+          const c = ensure();
+          if (!c || c.state !== 'running' || !noiseBuffer) return;
+          const { dur = 0.5, vol = 0.045, from = 260, to = 2600, q = 1.3 } = opts;
+          const t0 = c.currentTime;
+          const src = c.createBufferSource();
+          src.buffer = noiseBuffer;
+          const band = c.createBiquadFilter();
+          band.type = 'bandpass';
+          band.Q.value = q;
+          band.frequency.setValueAtTime(from, t0);
+          band.frequency.exponentialRampToValueAtTime(to, t0 + dur);
+          const gain = c.createGain();
+          gain.gain.setValueAtTime(0.0001, t0);
+          gain.gain.exponentialRampToValueAtTime(vol, t0 + dur * 0.2);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+          src.connect(band);
+          band.connect(gain);
+          gain.connect(master);
+          src.start(t0);
+          src.stop(t0 + dur + 0.03);
+        }
+
+        return {
+          get enabled() { return enabled; },
+          wake,
+          set(value) {
+            enabled = value;
+            try { localStorage.setItem('nova:sound', value ? 'on' : 'off'); } catch {}
+            if (value) {
+              wake();
+              tone(523.25, { dur: 0.18, vol: 0.04 });
+              setTimeout(() => tone(783.99, { dur: 0.26, vol: 0.03 }), 95);
+            }
+          },
+          /* som de troca de frame (escala pentatônica) */
+          frame(index) {
+            if (index === 2 || index === 4) air({ dur: 0.55, vol: 0.05, from: 180, to: 2400 });
+            const base = SCALE[index % SCALE.length];
+            tone(base, { dur: 0.5, vol: 0.05, type: 'triangle', cutoff: 2100 });
+            tone(base * 2, { dur: 0.34, vol: 0.02, delay: 0.025 });
+          },
+          hover() { tone(880, { dur: 0.07, vol: 0.014, cutoff: 2600 }); },
+          click() { tone(392, { dur: 0.13, vol: 0.035, type: 'triangle', glide: 1.5 }); },
+          scrub() { air({ dur: 0.2, vol: 0.022, from: 520, to: 1500, q: 2.4 }); }
+        };
+      })();
+
+      /* o navegador exige um gesto para liberar o áudio */
+      ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(type => {
+        addEventListener(type, () => Sound.wake(), { once: true, passive: true });
+      });
+
+      /* ==========================================================
+         1. ANIMAÇÕES DE ENTRADA
+         ========================================================== */
+      const animEls = [...document.querySelectorAll('[data-anim]')];
+      animEls.forEach(el => {
+        const siblings = el.parentElement ? [...el.parentElement.children].filter(n => n.hasAttribute('data-anim')) : [];
+        const i = siblings.indexOf(el);
+        el.style.setProperty('--d', `${clamp(i, 0, 6) * 70}ms`);
+      });
+
+      const hasObserver = 'IntersectionObserver' in window;
+
+      const reveal = hasObserver ? new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('in');
+          reveal.unobserve(entry.target);
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' }) : null;
+      if (reveal) animEls.forEach(el => reveal.observe(el));
+      else animEls.forEach(el => el.classList.add('in'));
+
+      /* contadores */
+      const counters = [...document.querySelectorAll('[data-count]')];
+      const countObserver = hasObserver ? new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const target = Number(el.dataset.count) || 0;
+          countObserver.unobserve(el);
+          if (reduced) { el.textContent = String(target); return; }
+          const start = performance.now();
+          const tick = now => {
+            const t = clamp((now - start) / 1300, 0, 1);
+            el.textContent = String(Math.round(target * smooth(t)));
+            if (t < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+      }, { threshold: 0.6 }) : null;
+      if (countObserver) counters.forEach(el => countObserver.observe(el));
+      else counters.forEach(el => { el.textContent = el.dataset.count; });
+
+      /* topo + link ativo */
+      const topbar = document.querySelector('#topbar');
+      const navLinks = [...document.querySelectorAll('.nav a[href^="#"]')];
+      const onTop = () => topbar.classList.toggle('scrolled', scrollY > 32);
+      onTop();
+
+      /* botão de som */
+      const soundBtn = document.querySelector('#sound');
+      const paintSound = () => soundBtn.setAttribute('aria-pressed', String(Sound.enabled));
+      paintSound();
+      soundBtn.addEventListener('click', () => {
+        Sound.set(!Sound.enabled);
+        paintSound();
+      });
+
+      const sectionForNav = navLinks
+        .map(link => ({ link, el: document.querySelector(link.getAttribute('href')) }))
+        .filter(item => item.el);
+
+      const navObserver = hasObserver ? new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          const match = sectionForNav.find(item => item.el === entry.target);
+          if (match) match.link.classList.toggle('active', entry.isIntersecting);
+        });
+      }, { rootMargin: '-45% 0px -45% 0px' }) : null;
+      if (navObserver) sectionForNav.forEach(item => navObserver.observe(item.el));
+
+      /* ==========================================================
+         2. MAPA DE FRAMES
+         Cada seção é um frame exato: quando o centro da seção
+         cruza o centro da tela, a cena está no estado exato.
+         ========================================================== */
+      const sections = [...document.querySelectorAll('[data-frame]')];
+      const FRAME_COUNT = sections.length;
+      const hudIndex = document.querySelector('#hudIndex');
+      const hudTotal = document.querySelector('#hudTotal');
+      const hudStage = document.querySelector('#hudStage');
+      const hudCaption = document.querySelector('#hudCaption');
+      const hudFill = document.querySelector('#hudFill');
+      hudTotal.textContent = String(FRAME_COUNT).padStart(2, '0');
+
+      let anchors = [];
+      let target = 0;
+      let current = 0;
+      let hudFrame = -1;
+
+      function measure() {
+        const maxY = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+        anchors = sections.map(el => {
+          const rect = el.getBoundingClientRect();
+          return {
+            el,
+            frame: Number(el.dataset.frame) || 0,
+            /* centro da seção no centro da tela, limitado à rolagem real */
+            y: clamp(rect.top + scrollY + rect.height / 2 - innerHeight / 2, 0, maxY)
+          };
+        }).sort((a, b) => a.frame - b.frame);
+        updateHud(true);
+      }
+
+      function progressAt(y) {
+        if (!anchors.length) return 0;
+        const first = anchors[0];
+        const last = anchors[anchors.length - 1];
+        if (y <= first.y) return first.frame / (FRAME_COUNT - 1);
+        if (y >= last.y) return last.frame / (FRAME_COUNT - 1);
+        for (let i = 0; i < anchors.length - 1; i++) {
+          const a = anchors[i];
+          const b = anchors[i + 1];
+          if (y >= a.y && y <= b.y) {
+            const t = smooth((y - a.y) / Math.max(1, b.y - a.y));
+            return (a.frame + (b.frame - a.frame) * t) / (FRAME_COUNT - 1);
+          }
+        }
+        return 1;
+      }
+
+      function updateHud(force) {
+        const p = clamp(target, 0, 1);
+        const index = clamp(Math.round(p * (FRAME_COUNT - 1)), 0, FRAME_COUNT - 1);
+        hudFill.style.transform = `scaleX(${p.toFixed(3)})`;
+        if (!force && index === hudFrame) return;
+        hudFrame = index;
+        const section = sections[index];
+        hudIndex.textContent = String(index + 1).padStart(2, '0');
+        hudStage.textContent = section.dataset.label;
+        hudCaption.textContent = section.dataset.caption;
+        hudStage.animate(
+          [{ opacity: 0, transform: 'translateY(7px)' }, { opacity: 1, transform: 'none' }],
+          { duration: reduced ? 1 : 520, easing: 'cubic-bezier(.16,1,.3,1)' }
+        );
+        hudCaption.animate(
+          [{ opacity: 0 }, { opacity: 1 }],
+          { duration: reduced ? 1 : 640, delay: reduced ? 0 : 70, easing: 'ease-out' }
+        );
+        if (!force) Sound.frame(index);
+      }
+
+      /* ==========================================================
+         3. CENA: PLANETA QUE FORMA, EXPLODE E RECONSTRÓI
+         ========================================================== */
+      const canvas = document.querySelector('#scene');
+      const ctx = canvas.getContext('2d', { alpha: true });
+
+      /*
+        Oito frames — cada coluna é um estado exato da cena:
+        0 Formação · 1 Órbita · 2 Fragmentação · 3 Giro
+        4 Explosão · 5 Reconstrução · 6 Colagem · 7 Novo mundo
+      */
+      const KEYS = {
+        explode: [0, 0, 0.26, 0.12, 1, 0.3, 0.12, 0],
+        shard:   [0, 0, 1, 0.5, 0.3, 0.15, 0.9, 0],
+        spin:    [0.5, 0.7, 1.1, 2.7, 1.5, 0.85, 1.2, 0.55],
+        ring:    [0.55, 1, 0.45, 1, 0.12, 0.65, 0.9, 1],
+        rim:     [0.5, 0.75, 0.55, 0.95, 0.1, 0.5, 0.7, 1],
+        glow:    [0.5, 0.7, 0.55, 0.85, 0.3, 0.55, 0.75, 0.95],
+        glitch:  [0, 0, 0.8, 0.15, 1, 0.3, 0.85, 0],
+        scale:   [1, 1, 0.95, 1.03, 1.07, 0.97, 1.01, 1]
+      };
+
+      function keyframe(stops, p) {
+        const scaled = clamp(p, 0, 1) * (stops.length - 1);
+        const i = Math.min(stops.length - 2, Math.floor(scaled));
+        const t = smooth(scaled - i);
+        return stops[i] + (stops[i + 1] - stops[i]) * t;
+      }
+
+      let w = 0, h = 0, dpr = 1, narrow = false;
+      let particles = [], stars = [], shards = [];
+      let mx = 0, my = 0, tmx = 0, tmy = 0;
+      let rot = 0;
+
+      function resize() {
+        dpr = Math.min(devicePixelRatio || 1, narrow ? 1.5 : 1.35);
+        w = innerWidth;
+        h = innerHeight;
+        narrow = w < 980;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${h}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const count = narrow ? 190 : clamp(Math.round(w * h / 4400), 240, 340);
+        particles = Array.from({ length: count }, (_, i) => {
+          const a = Math.random() * Math.PI * 2;
+          const z = Math.random() * 2 - 1;
+          const r = Math.sqrt(1 - z * z);
+          return {
+            theta: Math.random() * Math.PI * 2,
+            phi: Math.acos(2 * Math.random() - 1),
+            seed: (i * 0.618033 + Math.random() * 4) % 1,
+            size: 0.45 + Math.random() * 1.35,
+            orbit: 0.45 + Math.random() * 1.4,
+            dx: Math.cos(a) * r,
+            dy: Math.sin(a) * r,
+            dz: z
+          };
+        });
+
+        /* 12 fragmentos: agrupa partículas por região e acha o centro de cada uma */
+        shards = Array.from({ length: 12 }, () => ({ x: 0, y: 0, z: 0, n: 0, angle: Math.random() * Math.PI * 2 }));
+        for (const s of particles) {
+          const region = Math.min(3, Math.floor((s.theta / (Math.PI * 2)) * 4)) +
+                         4 * Math.min(2, Math.floor((s.phi / Math.PI) * 3));
+          s.shard = region;
+          const sinPhi = Math.sin(s.phi);
+          shards[region].x += sinPhi * Math.cos(s.theta);
+          shards[region].y += Math.cos(s.phi);
+          shards[region].z += sinPhi * Math.sin(s.theta);
+          shards[region].n++;
+        }
+        for (const sh of shards) {
+          if (sh.n) { sh.x /= sh.n; sh.y /= sh.n; sh.z /= sh.n; }
+          else { sh.x = 0; sh.y = 1; sh.z = 0; }
+        }
+
+        stars = Array.from({ length: narrow ? 34 : 66 }, () => ({
+          x: Math.random(),
+          y: Math.random(),
+          z: 0.2 + Math.random() * 0.8,
+          p: Math.random() * Math.PI * 2,
+          s: 0.4 + Math.random() * 1
+        }));
+
+        measure();
+        if (reduced) draw(performance.now());
+      }
+
+      function draw(time) {
+        const p = clamp(current, 0, 1);
+        const ex = keyframe(KEYS.explode, p);
+        const shard = keyframe(KEYS.shard, p);
+        const ring = keyframe(KEYS.ring, p);
+        const rim = keyframe(KEYS.rim, p);
+        const glow = keyframe(KEYS.glow, p);
+        const spin = keyframe(KEYS.spin, p);
+        const glitchV = keyframe(KEYS.glitch, p);
+        const scaleK = keyframe(KEYS.scale, p);
+
+        /* tremor de câmera nas explosões */
+        const shake = reduced ? 0 : ex * 3.4;
+        let cx = w * (narrow ? 0.5 : 0.735) + mx * 14 + Math.sin(time * 0.041) * shake;
+        let cy = h * (narrow ? 0.31 : 0.5) + my * 12 + Math.cos(time * 0.049) * shake * 0.7;
+        const base = Math.min(w * (narrow ? 0.3 : 0.172), h * (narrow ? 0.22 : 0.27));
+        const R = base * scaleK * (1 + Math.sin(time * 0.0007) * 0.006);
+
+        /* giro global do planeta */
+        const yaw = rot;
+        const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+        const tilt = 0.08 + Math.sin(time * 0.00011) * 0.03;
+        const cosT = Math.cos(tilt), sinT = Math.sin(tilt);
+
+        ctx.clearRect(0, 0, w, h);
+
+        /* halo */
+        const halo = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * (1.9 + ex * 1.2));
+        halo.addColorStop(0, `rgba(120,255,140,${(0.06 + glow * 0.05 + ex * 0.04) * (1 - shard * 0.5)})`);
+        halo.addColorStop(0.55, `rgba(64,214,140,${(0.03 + ex * 0.04) * (1 - shard * 0.5)})`);
+        halo.addColorStop(1, 'rgba(40,180,120,0)');
+        ctx.fillStyle = halo;
+        ctx.fillRect(0, 0, w, h);
+
+        /* estrelas distantes */
+        for (const s of stars) {
+          const tw = 0.45 + Math.sin(time * 0.0012 + s.p) * 0.25;
+          ctx.fillStyle = `rgba(226,235,235,${tw * 0.35 * s.z})`;
+          ctx.beginPath();
+          ctx.arc(s.x * w, s.y * h, s.s * 0.7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        /* corpo do planeta */
+        const bodyFade = (1 - ex * 0.94) * (1 - shard);
+        const body = ctx.createRadialGradient(
+          cx - R * 0.34, cy - R * 0.38, R * 0.04,
+          cx + R * 0.08, cy + R * 0.12, R * 1.02
+        );
+        body.addColorStop(0, `rgba(206,255,182,${0.95 * bodyFade})`);
+        body.addColorStop(0.2, `rgba(104,245,158,${0.92 * bodyFade})`);
+        body.addColorStop(0.52, `rgba(19,166,134,${0.9 * bodyFade})`);
+        body.addColorStop(0.8, `rgba(10,86,96,${0.92 * bodyFade})`);
+        body.addColorStop(1, `rgba(6,28,38,${0.96 * bodyFade})`);
+        ctx.fillStyle = body;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.fill();
+
+        /* faixas da superfície */
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.995, 0, Math.PI * 2);
+        ctx.clip();
+        for (let i = 0; i < 6; i++) {
+          const y = cy - R + i * R * 0.36 + Math.sin(time * 0.0005 + i) * R * 0.03;
+          ctx.beginPath();
+          ctx.ellipse(
+            cx + Math.sin(i * 7 + time * 0.00018) * R * 0.14,
+            y,
+            R * (0.55 + (i % 3) * 0.16),
+            R * (0.03 + (i % 2) * 0.016),
+            Math.sin(i + time * 0.0003) * 0.2,
+            0, Math.PI * 2
+          );
+          ctx.fillStyle = i % 2
+            ? `rgba(190,255,170,${0.045 * bodyFade * (1 - shard * 0.5)})`
+            : `rgba(220,255,190,${0.07 * bodyFade * (1 - shard * 0.5)})`;
+          ctx.fill();
+        }
+        ctx.restore();
+
+        /* blocos da fragmentação: dão volume a cada pedaço */
+        if (shard > 0.06) {
+          for (const sh of shards) {
+            const dist = shard * R * (0.18 + (sh.n % 9) * 0.038);
+            const fragAngle = sh.angle + shard * 1.5 + time * 0.00013;
+            const shx = (sh.x * Math.cos(fragAngle) - sh.z * Math.sin(fragAngle)) * dist;
+            const shz = (sh.x * Math.sin(fragAngle) + sh.z * Math.cos(fragAngle)) * dist;
+            const shy = sh.y * dist;
+
+            const bx = sh.x * cosY - sh.z * sinY;
+            const bz = sh.x * sinY + sh.z * cosY;
+            const by = sh.y * cosT - bz * sinT;
+            const bz2 = sh.y * sinT + bz * cosT;
+
+            const X = bx * R + shx;
+            const Y = by * R + shy;
+            const Z = bz2 * R + shz;
+            const scale = (R * 2.8) / (R * 2.8 + Z);
+            const px = cx + X * scale;
+            const py = cy + Y * scale;
+            const radius = R * (0.24 + (sh.n % 5) * 0.035) * scale * (1 - ex * 0.3);
+            const alpha = shard * (1 - ex * 0.7) * clamp((Z / R + 1.4) / 2.4, 0.15, 1);
+            const outward = Math.atan2(py - cy, px - cx);
+
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(outward);
+            ctx.scale(1.22, 0.82);
+            const blob = ctx.createRadialGradient(-radius * 0.28, -radius * 0.32, radius * 0.04, 0, 0, radius);
+            blob.addColorStop(0, `rgba(200,255,180,${0.5 * alpha})`);
+            blob.addColorStop(0.5, `rgba(38,182,146,${0.4 * alpha})`);
+            blob.addColorStop(0.86, `rgba(9,66,80,${0.42 * alpha})`);
+            blob.addColorStop(1, 'rgba(6,30,40,0)');
+            ctx.fillStyle = blob;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = `rgba(201,255,77,${0.28 * alpha})`;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.95, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+
+        /* partículas / superfície / fragmentos */
+        for (let i = 0; i < particles.length; i++) {
+          const s = particles[i];
+          const twist = shard * (shards[s.shard] ? shards[s.shard].angle : 0) * 0.35;
+          const a = s.theta + rot * s.orbit * 0.55 + twist;
+          const sinPhi = Math.sin(s.phi);
+          const x0 = sinPhi * Math.cos(a);
+          const y0 = Math.cos(s.phi);
+          const z0 = sinPhi * Math.sin(a);
+
+          /* giro do planeta em torno do próprio eixo */
+          const x1 = x0 * cosY - z0 * sinY;
+          const z1 = x0 * sinY + z0 * cosY;
+          const y1 = y0 * cosT - z1 * sinT;
+          const z2 = y0 * sinT + z1 * cosT;
+
+          /* fragmentação: cada bloco se desprende e gira */
+          const sh = shards[s.shard] || shards[0];
+          const frag = shard * R * (0.18 + (sh.n % 9) * 0.038);
+          const fragAngle = sh.angle + shard * 1.5 + time * 0.00013;
+          const shx = (sh.x * Math.cos(fragAngle) - sh.z * Math.sin(fragAngle)) * frag;
+          const shz = (sh.x * Math.sin(fragAngle) + sh.z * Math.cos(fragAngle)) * frag;
+          const shy = sh.y * frag;
+
+          const push = ex * R * (0.5 + s.seed * 2.2);
+          const scatter = shard * R * (s.seed - 0.5) * 0.12;
+          const drift = (1 - ex) * Math.sin(time * 0.0009 + s.seed * 12) * R * 0.012;
+          const X = x1 * R + s.dx * push + shx + scatter;
+          const Y = y1 * R + s.dy * push + shy;
+          const Z = z2 * R + s.dz * push + shz;
+
+          const scale = (R * 2.8) / (R * 2.8 + Z);
+          let px = cx + X * scale;
+          let py = cy + Y * scale;
+
+          /* glitch: fatias horizontais deslocadas */
+          if (glitchV > 0.02) {
+            const band = Math.floor(((py + 40) / h) * 16);
+            const noise = Math.sin(band * 91.7 + Math.floor(time * 0.03)) * 0.5 + 0.5;
+            px += (noise - 0.5) * glitchV * 26;
+          }
+          if (px < -10 || px > w + 10 || py < -10 || py > h + 10) continue;
+
+          const front = clamp((Z / R + 1) / 2, 0, 1);
+          const visible = (0.3 + front * 0.7) * (1 - ex * 0.15);
+          const hot = ex > 0.12 && s.seed > 1 - ex * 0.55;
+          const alpha = front * 0.55 * (1 - ex * 0.1) + 0.12;
+
+          if (hot) {
+            ctx.strokeStyle = `rgba(214,255,138,${0.18 * ex})`;
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(px, py);
+            ctx.lineTo(px - s.dx * R * 0.22 * ex, py - s.dy * R * 0.22 * ex);
+            ctx.stroke();
+            ctx.fillStyle = `rgba(222,255,150,${0.85 * visible})`;
+            ctx.beginPath();
+            ctx.arc(px, py, s.size * 1.25, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = `rgba(${Math.round(150 + front * 70)},${Math.round(232 + front * 20)},${Math.round(180 + front * 60)},${alpha})`;
+            ctx.beginPath();
+            ctx.arc(px + drift, py + drift * 0.6, s.size * (0.45 + front * 0.6), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        /* brilho na borda */
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.002, Math.PI * 1.03, Math.PI * 1.92);
+        ctx.strokeStyle = `rgba(201,255,77,${0.16 + rim * 0.5 * (1 - ex)})`;
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = 'rgba(201,255,140,.9)';
+        ctx.shadowBlur = 16;
+        ctx.stroke();
+        ctx.restore();
+
+        /* onda de choque */
+        if (ex > 0.02) {
+          ctx.save();
+          ctx.translate(cx, cy);
+
+          /* núcleo luminoso */
+          const coreR = R * (0.22 + ex * 0.6);
+          const core = ctx.createRadialGradient(0, 0, 0, 0, 0, coreR * 2.2);
+          core.addColorStop(0, `rgba(246,255,220,${0.5 * ex})`);
+          core.addColorStop(0.3, `rgba(196,255,128,${0.3 * ex})`);
+          core.addColorStop(1, 'rgba(150,255,90,0)');
+          ctx.fillStyle = core;
+          ctx.beginPath();
+          ctx.arc(0, 0, coreR * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          for (let r = 0; r < 3; r++) {
+            const phase = (ex * 1.35 + r * 0.27) % 1;
+            const radius = R * (0.35 + phase * 3.6);
+            const alpha = ex * (1 - phase) * 0.4;
+            if (alpha <= 0.004) continue;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, radius, radius * (0.34 + r * 0.03), 0, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${r % 2 ? '192,255,110' : '232,255,196'},${alpha})`;
+            ctx.lineWidth = 0.8 + alpha * 2;
+            ctx.stroke();
+          }
+          const rays = 10;
+          for (let i = 0; i < rays; i++) {
+            const angle = (i / rays) * Math.PI * 2 + rot * 1.6;
+            const len = R * (0.1 + (i % 4) * 0.09) * ex;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(angle) * R * 0.86, Math.sin(angle) * R * 0.86);
+            ctx.lineTo(Math.cos(angle) * (R + len), Math.sin(angle) * (R + len));
+            ctx.strokeStyle = `rgba(207,255,136,${ex * (0.1 + (i % 3) * 0.06)})`;
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        /* linhas de velocidade no giro rápido */
+        if (spin > 1.35) {
+          const intensity = Math.min(1, (spin - 1.35) / 1.4);
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(rot * 0.35);
+          for (let i = 0; i < 24; i++) {
+            const a = (i / 24) * Math.PI * 2;
+            const r0 = R * (1.06 + (i % 4) * 0.06);
+            const r1 = r0 + R * (0.1 + (i % 3) * 0.07) * intensity;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+            ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
+            ctx.strokeStyle = `rgba(201,255,140,${0.2 * intensity})`;
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        if (glitchV > 0.05) {
+          /* scanlines do glitch */
+          for (let i = 0; i < 26; i++) {
+            const y = (i / 26) * h;
+            const wdt = Math.sin(i * 7.3 + time * 0.003) * 0.5 + 0.5;
+            ctx.fillStyle = `rgba(190,255,150,${0.025 * glitchV * wdt})`;
+            ctx.fillRect(0, y, w, 1);
+          }
+        }
+
+        /* anel orbital + satélite */
+        if (ring > 0.03) {
+          const ringTilt = -0.34 + Math.sin(time * 0.00012) * 0.04;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(ringTilt);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, R * 1.52, R * 0.37, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(201,255,77,${0.12 + ring * 0.24 * (1 - ex * 0.5)})`;
+          ctx.lineWidth = 0.9;
+          ctx.stroke();
+
+          /* segundo anel, em outra inclinação */
+          ctx.rotate(-1.15);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, R * 1.3, R * 0.58, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(150,255,160,${0.06 + ring * 0.09})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+          ctx.rotate(1.15);
+
+          if (ring > 0.25) {
+            const angle = time * 0.00028 + p * 2.4;
+            const sx = Math.cos(angle) * R * 1.52;
+            const sy = Math.sin(angle) * R * 0.37;
+            ctx.fillStyle = `rgba(226,255,180,${0.25 + ring * 0.6})`;
+            ctx.shadowColor = 'rgba(201,255,120,.9)';
+            ctx.shadowBlur = 14;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+          ctx.restore();
+        }
+
+      }
+
+      /* ==========================================================
+         4. LOOP E EVENTOS
+         ========================================================== */
+      /* barra de progresso, brilho do cursor e botão magnético */
+      const railFill = document.querySelector('#railFill');
+      const glowEl = document.querySelector('#glow');
+      const finePointer = matchMedia('(pointer:fine)').matches;
+      let glowX = innerWidth / 2, glowY = innerHeight / 2, glowTX = glowX, glowTY = glowY;
+
+      const magnetic = document.querySelector('.hero .btn');
+      if (magnetic && finePointer && !reduced) {
+        magnetic.addEventListener('pointermove', event => {
+          const rect = magnetic.getBoundingClientRect();
+          const dx = (event.clientX - (rect.left + rect.width / 2)) / rect.width;
+          const dy = (event.clientY - (rect.top + rect.height / 2)) / rect.height;
+          magnetic.style.transform = `translate(${(dx * 6).toFixed(2)}px, ${(dy * 8).toFixed(2)}px)`;
+        });
+        magnetic.addEventListener('pointerleave', () => { magnetic.style.transform = ''; });
+      }
+
+      function syncProgress() {
+        railFill.style.transform = `scaleX(${clamp(current, 0, 1).toFixed(4)})`;
+      }
+
+      let raf = 0;
+      let last = 0;
+
+      function loop(time) {
+        raf = 0;
+        if (document.hidden) return;
+        if (time - last < 32) { raf = requestAnimationFrame(loop); return; }
+        const dt = Math.min(64, time - last);
+        last = time;
+
+        const ease = 1 - Math.exp(-dt / 110);
+        current += (target - current) * ease;
+        if (Math.abs(target - current) < 0.0004) current = target;
+
+        const move = 1 - Math.exp(-dt / 180);
+        mx += (tmx - mx) * move;
+        my += (tmy - my) * move;
+
+        rot += dt * 0.000045 * keyframe(KEYS.spin, clamp(current, 0, 1));
+
+        draw(time);
+        updateHud(false);
+        syncProgress();
+
+        if (finePointer && glowEl) {
+          glowX += (glowTX - glowX) * move;
+          glowY += (glowTY - glowY) * move;
+          glowEl.style.transform = `translate3d(${glowX.toFixed(1)}px, ${glowY.toFixed(1)}px, 0)`;
+        }
+
+        raf = requestAnimationFrame(loop);
+      }
+
+      let ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          onTop();
+          target = progressAt(scrollY);
+          if (reduced) {
+            current = target;
+            draw(performance.now());
+            updateHud(false);
+            syncProgress();
+          } else {
+            updateHud(false);
+            if (!raf) raf = requestAnimationFrame(loop);
+          }
+        });
+      }
+
+      /* navegação interna pousa exatamente no frame da seção */
+      const anchorOf = el => {
+        const found = anchors.find(a => a.el === el);
+        if (found) return found.y;
+        const rect = el.getBoundingClientRect();
+        return Math.max(0, rect.top + scrollY);
+      };
+      document.addEventListener('click', event => {
+        const link = event.target.closest('a[href^="#"]');
+        if (!link) return;
+        Sound.click();
+        const id = link.getAttribute('href').slice(1);
+        const el = id ? document.getElementById(id) : null;
+        if (!el) return;
+        event.preventDefault();
+        const top = id === 'inicio' ? 0 : anchorOf(el);
+        scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+        history.replaceState(null, '', `#${id}`);
+      });
+
+      /* sons de interface */
+      let lastHover = 0;
+      document.addEventListener('pointerover', event => {
+        const el = event.target.closest('a,button,.project,.clients li,.steps li');
+        if (!el) return;
+        const now = performance.now();
+        if (now - lastHover < 90) return;
+        lastHover = now;
+        Sound.hover();
+      }, { passive: true });
+
+      let lastScrub = 0;
+      addEventListener('wheel', () => {
+        const now = performance.now();
+        if (now - lastScrub < 260) return;
+        lastScrub = now;
+        Sound.scrub();
+      }, { passive: true });
+
+      addEventListener('scroll', onScroll, { passive: true });
+      addEventListener('resize', () => { resize(); onScroll(); }, { passive: true });
+      addEventListener('pointermove', event => {
+        tmx = (event.clientX / w - 0.5) * 2;
+        tmy = (event.clientY / h - 0.5) * 2;
+        glowTX = event.clientX;
+        glowTY = event.clientY;
+      }, { passive: true });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && !reduced && !raf) {
+          last = performance.now() - 32;
+          raf = requestAnimationFrame(loop);
+        }
+      });
+
+      /* inicialização */
+      resize();
+      onTop();
+      target = progressAt(scrollY);
+      current = target;
+      updateHud(true);
+      syncProgress();
+      draw(performance.now());
+      if (!reduced) raf = requestAnimationFrame(loop);
+      if (document.fonts?.ready) document.fonts.ready.then(() => { measure(); onScroll(); });
+    })();
+  </script>
+  <script>
+    (() => {
+      const y = Number(new URLSearchParams(location.search).get('y') || 0);
+      const go = () => scrollTo(0, y);
+      addEventListener('load', () => { go(); setTimeout(go, 250); setTimeout(go, 700); setTimeout(go, 1200); });
+    })();
+  </script>
+</body>
+</html>
