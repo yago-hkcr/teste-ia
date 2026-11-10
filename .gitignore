@@ -1,0 +1,8 @@
+# artefatos de teste/revisão
+*.png
+.chrome-tmp/
+.vercel/
+.deploy-nova/
+_frame-review.html
+cdp-shot.mjs
+check.js
