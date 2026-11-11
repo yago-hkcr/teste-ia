@@ -65,12 +65,30 @@
       .medals-img{transform:none}
       .medals-cap{font-size:.62rem;letter-spacing:.16em}
     }
+
+    /* ── kanji de fundo (柔道 → 柔術) ── */
+    .kanji-bg{position:fixed;top:50%;right:clamp(-8vw,-2vw,10px);z-index:1;transform:translateY(-50%);pointer-events:none;mix-blend-mode:screen}
+    .kanji-bg span{position:absolute;top:50%;left:50%;writing-mode:vertical-rl;font-family:"Yu Mincho","Hiragino Mincho ProN","MS Mincho",serif;font-size:clamp(150px,21vw,330px);line-height:.9;letter-spacing:.04em;color:#f2efe9;opacity:0;filter:blur(.6px);text-shadow:0 0 80px rgba(216,178,106,.10);will-change:opacity,transform}
+    @media(max-width:860px){.kanji-bg{right:-16vw}.kanji-bg span{font-size:46vw}}
+
+    /* ── botão de som ── */
+    .sound-btn{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--muted);cursor:pointer;transition:color .25s ease,border-color .25s ease,background .25s ease,transform .3s ease}
+    .sound-btn:hover{color:var(--gold);border-color:#d8b26a80;background:#d8b26a1a;transform:translateY(-1px)}
+    .sound-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .sound-btn .slash{display:none}
+    .sound-btn[aria-pressed="false"] .w1,.sound-btn[aria-pressed="false"] .w2{display:none}
+    .sound-btn[aria-pressed="false"] .slash{display:block;stroke:var(--gold)}
+    .sound-btn[aria-pressed="true"]{color:var(--gold)}
   </style>
 </head>
   <body>
     <canvas id="bg" aria-hidden="true"></canvas>
     <div class="scrim" aria-hidden="true"></div>
     <div class="dust" id="dust" aria-hidden="true"></div>
+    <div class="kanji-bg" id="kanjiBg" aria-hidden="true">
+      <span class="kanji-jud">柔道</span>
+      <span class="kanji-jj">柔術</span>
+    </div>
     <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
     <header class="top" id="top">
@@ -87,6 +105,15 @@
           <a href="#galeria">Momentos</a>
           <a href="#medalhas">Conquistas</a>
         </nav>
+
+        <button class="sound-btn" id="soundBtn" type="button" aria-pressed="true" aria-label="Desligar o som" title="Som">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5v5a1 1 0 0 0 1 1h3.2l4.3 3.4c.6.5 1.5.1 1.5-.7V5.8c0-.8-.9-1.2-1.5-.7L8.2 8.5H5a1 1 0 0 0-1 1z"></path>
+            <path class="w1" d="M16 8.6a5 5 0 0 1 0 6.8"></path>
+            <path class="w2" d="M18.6 6a9 9 0 0 1 0 12"></path>
+            <path class="slash" d="M3.5 3.5l17 17"></path>
+          </svg>
+        </button>
 
         <a class="ig-btn" data-athlete="instagram" href="#" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -304,6 +331,187 @@
         });
       }
     })();
+  </script>
+  <script>
+(() => {
+  /* ───────── kanji 柔道 → 柔術 conforme a rolagem ───────── */
+  const kJud = document.querySelector('.kanji-jud');
+  const kJj = document.querySelector('.kanji-jj');
+  const modal = document.querySelector('#modalidades');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let morph = 0;
+
+  function kanjiTick() {
+    if (!kJud || !kJj || !modal) return;
+    const r = modal.getBoundingClientRect();
+    const vh = innerHeight || 1;
+    let t = (vh * 0.82 - r.top) / (vh * 0.95);
+    t = Math.max(0, Math.min(1, t));
+    const e = t * t * (3 - 2 * t);
+    morph = e;
+    kJud.style.opacity = (0.085 * (1 - e)).toFixed(4);
+    kJj.style.opacity = (0.085 * e).toFixed(4);
+    if (!reduce) {
+      kJud.style.transform = 'translate(-50%,-50%) translateY(' + (-46 * e).toFixed(1) + 'px) scale(' + (1 + 0.07 * e).toFixed(3) + ') rotate(' + (-2.5 * e).toFixed(2) + 'deg)';
+      kJj.style.transform = 'translate(-50%,-50%) translateY(' + (46 * (1 - e)).toFixed(1) + 'px) scale(' + (1 - 0.07 * (1 - e)).toFixed(3) + ') rotate(' + (2.5 * (1 - e)).toFixed(2) + 'deg)';
+    }
+    if (window.__kjSound) window.__kjSound(e);
+  }
+
+  let kRaf = 0;
+  const kUpdate = () => { kRaf = 0; kanjiTick(); };
+  addEventListener('scroll', () => { if (!kRaf) kRaf = requestAnimationFrame(kUpdate); }, { passive: true });
+  addEventListener('resize', kUpdate, { passive: true });
+  kanjiTick();
+
+  /* ───────── som sintetizado ───────── */
+  const btn = document.getElementById('soundBtn');
+  let ctx = null, master = null, noise = null;
+  let enabled = true;
+  try { enabled = localStorage.getItem('ya:sound') !== 'off'; } catch (e) {}
+  let lastY = scrollY, lastWhoosh = 0, lastChime = 0;
+
+  function ensure() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = 0.55;
+      master.connect(ctx.destination);
+      const len = Math.floor(ctx.sampleRate * 1.2);
+      noise = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return true;
+  }
+
+  function env(g, t0, atk, dec, peak) {
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t0 + atk);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + atk + dec);
+  }
+
+  function blip(freq, dur, type, vol, slide) {
+    if (!enabled || !ensure()) return;
+    const t0 = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t0);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * slide), t0 + dur);
+    env(g, t0, 0.006, dur, vol || 0.06);
+    o.connect(g).connect(master);
+    o.start(t0); o.stop(t0 + dur + 0.08);
+  }
+
+  function whoosh(vol, dur, f0, f1) {
+    if (!enabled || !ensure()) return;
+    const t0 = ctx.currentTime;
+    const src = ctx.createBufferSource(); src.buffer = noise;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1;
+    bp.frequency.setValueAtTime(f0, t0);
+    bp.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    const g = ctx.createGain(); env(g, t0, 0.05, dur, vol);
+    src.connect(bp).connect(g).connect(master);
+    src.start(t0); src.stop(t0 + dur + 0.1);
+  }
+
+  function chime(vol) {
+    if (!enabled || !ensure()) return;
+    const t0 = ctx.currentTime;
+    [880, 1318.5, 1760].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      env(g, t0 + i * 0.025, 0.01, 1.15, (vol || 0.05) * (1 - i * 0.22));
+      o.connect(g).connect(master);
+      o.start(t0 + i * 0.025); o.stop(t0 + 1.4);
+    });
+  }
+
+  function tok(vol) {
+    if (!enabled || !ensure()) return;
+    const t0 = ctx.currentTime;
+    [110, 220].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, t0);
+      o.frequency.exponentialRampToValueAtTime(f * 0.7, t0 + 0.25);
+      env(g, t0, 0.01, 0.3, (vol || 0.07) * (1 - i * 0.35));
+      o.connect(g).connect(master);
+      o.start(t0); o.stop(t0 + 0.4);
+    });
+  }
+
+  /* som do morph do kanji (com histerese) */
+  let morphState = -1;
+  window.__kjSound = e => {
+    if (!enabled) return;
+    const s = e > 0.55 ? 2 : e < 0.35 ? 1 : 0;
+    if (morphState === -1) { morphState = s; return; }
+    if (s && s !== morphState) {
+      morphState = s;
+      chime(0.045);
+    }
+  };
+
+  /* clique em links/botões */
+  document.addEventListener('pointerdown', e => {
+    const el = e.target.closest('a, button');
+    if (!el || el.id === 'soundBtn') return;
+    blip(560, 0.055, 'triangle', 0.05, 0.82);
+  }, true);
+
+  /* clique nas medalhas: metal */
+  const medals = document.getElementById('medalsStage');
+  if (medals) medals.addEventListener('click', () => {
+    chime(0.05);
+    blip(2350, 0.14, 'sine', 0.03, 1.6);
+  });
+
+  /* rolagem: whoosh sutil */
+  addEventListener('scroll', () => {
+    const y = scrollY;
+    const dy = y - lastY;
+    lastY = y;
+    const t = performance.now();
+    if (Math.abs(dy) < 140 || t - lastWhoosh < 420) return;
+    lastWhoosh = t;
+    whoosh(0.028, 0.5, 260 + Math.random() * 220, 1250 + Math.random() * 500);
+  }, { passive: true });
+
+  /* entrada de seção: tok discreto */
+  const secs = [...document.querySelectorAll('main .section')];
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      for (const en of entries) {
+        if (!en.isIntersecting) continue;
+        const t = performance.now();
+        if (t - lastChime < 900) continue;
+        lastChime = t;
+        tok(0.05);
+      }
+    }, { rootMargin: '-42% 0px -52% 0px' });
+    secs.forEach(sec => io.observe(sec));
+  }
+
+  /* desbloqueia o áudio no primeiro gesto */
+  const wake = () => { if (enabled) ensure(); };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, wake, { once: true, passive: true }));
+
+  /* botão de som */
+  if (btn) {
+    btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+    btn.addEventListener('click', () => {
+      enabled = !enabled;
+      try { localStorage.setItem('ya:sound', enabled ? 'on' : 'off'); } catch (e) {}
+      btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+      btn.setAttribute('aria-label', enabled ? 'Desligar o som' : 'Ligar o som');
+      if (enabled) { ensure(); chime(0.06); }
+    });
+  }
+})();
   </script>
 </body>
 </html>
