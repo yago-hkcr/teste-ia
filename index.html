@@ -39,6 +39,21 @@
     .hero-card:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(3,4,6,0) 48%,rgba(3,4,6,.78) 100%)}
     .hero-card-foot{z-index:3}
     @media (max-width:640px){.hero-photo{object-position:50% 8%}}
+
+    /* ── medalhas 3D ── */
+    .medals{overflow:visible}
+    .medals-stage{position:relative;display:grid;place-items:center;perspective:1200px;perspective-origin:50% 45%;padding:clamp(14px,3vw,40px) 0 clamp(6px,2vw,18px)}
+    .medals-glow{position:absolute;width:min(72%,780px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(216,178,106,.20),rgba(216,178,106,.05) 46%,transparent 68%);filter:blur(24px);pointer-events:none}
+    .medals-float{position:relative;transform-style:preserve-3d;animation:medalFloat 9s ease-in-out infinite;will-change:transform;max-width:100%}
+    @keyframes medalFloat{0%,100%{transform:translateY(0) rotateZ(0)}50%{transform:translateY(-12px) rotateZ(-.6deg)}}
+    .medals-img{position:relative;z-index:2;display:block;width:min(100%,780px);height:auto;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%);mask-image:linear-gradient(180deg,transparent 0,#000 16%);-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6)) drop-shadow(0 0 40px rgba(216,178,106,.10));transform:rotateX(calc(var(--rx,0) * 1deg)) rotateY(calc(var(--ry,0) * 1deg)) translateZ(28px);transform-style:preserve-3d;transition:transform .16s linear;will-change:transform}
+    .medals-shadow{position:absolute;left:10%;right:10%;bottom:1%;height:11%;background:radial-gradient(ellipse,rgba(0,0,0,.85),transparent 70%);filter:blur(18px);z-index:0;transform:translateY(16px)}
+    .medals-cap{margin:clamp(12px,2vw,22px) 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);text-align:center}
+    @media(max-width:640px){
+      .medals-stage{padding-top:6px}
+      .medals-img{transform:none}
+      .medals-cap{font-size:.62rem;letter-spacing:.16em}
+    }
   </style>
 </head>
   <body>
@@ -59,6 +74,7 @@
           <a href="#caminho">Caminho</a>
           <a href="#modalidades">Modalidades</a>
           <a href="#galeria">Momentos</a>
+          <a href="#medalhas">Conquistas</a>
         </nav>
 
         <a class="ig-btn" data-athlete="instagram" href="#" target="_blank" rel="noopener">
@@ -180,14 +196,24 @@
         </div>
       </section>
 
-      <!-- ─────────────────────── CONQUISTAS ──────────────────── -->
-      <section class="section" id="conquistas" data-mark="06" hidden>
+      <!-- ─────────────────────── MEDALHAS ────────────────────── -->
+      <section class="section medals" id="medalhas" data-mark="06">
         <div class="wrap">
           <header class="section-head">
-            <p class="eyebrow reveal">Resultados</p>
-            <h2 class="h2 reveal" style="--i: 1">Conquistas</h2>
+            <p class="eyebrow reveal">Conquistas</p>
+            <h2 class="h2 reveal" style="--i: 1">O peso de cada medalha</h2>
+            <p class="section-note reveal" style="--i: 2">
+              Cada uma carrega um treino, uma viagem e uma luta. Nada aqui foi sorte.
+            </p>
           </header>
-          <div class="grid grid-3" id="conquistas-grid"></div>
+          <div class="medals-stage" id="medalsStage">
+            <div class="medals-glow" aria-hidden="true"></div>
+            <div class="medals-float">
+              <div class="medals-shadow" aria-hidden="true"></div>
+              <img class="medals-img" src="/media/medalhas.webp" alt="Medalhas de judô de Yago Assis — Ouro Fino, Paulista e Open" width="814" height="551" loading="lazy">
+            </div>
+          </div>
+          <p class="medals-cap reveal">Ouro Fino · Paulista · Open — 2023 a 2025</p>
         </div>
       </section>
 
@@ -219,6 +245,7 @@
           <a href="#numeros">Números</a>
           <a href="#caminho">Caminho</a>
           <a href="#galeria">Momentos</a>
+          <a href="#medalhas">Conquistas</a>
         </nav>
         <a class="foot-ig" data-athlete="instagram" href="#" target="_blank" rel="noopener">
           <span data-athlete="handle">@yagoassis.ofc</span>
@@ -226,5 +253,34 @@
       </div>
     </footer>
 
-  </body>
+    <script>
+    (() => {
+      const stage = document.getElementById('medalsStage');
+      const img = stage && stage.querySelector('.medals-img');
+      if (!stage || !img) return;
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const fine = matchMedia('(pointer:fine)').matches;
+      if (reduce || !fine) return;
+      let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
+      const step = () => {
+        raf = 0;
+        cx += (tx - cx) * 0.12;
+        cy += (ty - cy) * 0.12;
+        img.style.setProperty('--ry', (cx * 9).toFixed(2));
+        img.style.setProperty('--rx', (-cy * 7).toFixed(2));
+        if (Math.abs(tx - cx) > 0.002 || Math.abs(ty - cy) > 0.002) raf = requestAnimationFrame(step);
+      };
+      stage.addEventListener('pointermove', e => {
+        const r = stage.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+        if (!raf) raf = requestAnimationFrame(step);
+      });
+      stage.addEventListener('pointerleave', () => {
+        tx = 0; ty = 0;
+        if (!raf) raf = requestAnimationFrame(step);
+      });
+    })();
+  </script>
+</body>
 </html>
