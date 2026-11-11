@@ -40,17 +40,25 @@
     .hero-card-foot{z-index:3}
     @media (max-width:640px){.hero-photo{object-position:50% 8%}}
 
-    /* ── medalhas 3D ── */
+    /* ── medalhas penduradas ── */
     .medals{overflow:visible}
-    .medals-stage{position:relative;display:grid;place-items:center;perspective:1200px;perspective-origin:50% 45%;padding:clamp(14px,3vw,40px) 0 clamp(6px,2vw,18px)}
-    .medals-glow{position:absolute;width:min(72%,780px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(216,178,106,.20),rgba(216,178,106,.05) 46%,transparent 68%);filter:blur(24px);pointer-events:none}
-    .medals-float{position:relative;transform-style:preserve-3d;animation:medalFloat 9s ease-in-out infinite;will-change:transform;max-width:100%}
-    @keyframes medalFloat{0%,100%{transform:translateY(0) rotateZ(0)}50%{transform:translateY(-12px) rotateZ(-.6deg)}}
-    .medals-img{position:relative;z-index:2;display:block;width:min(100%,780px);height:auto;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%);mask-image:linear-gradient(180deg,transparent 0,#000 16%);-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6)) drop-shadow(0 0 40px rgba(216,178,106,.10));transform:rotateX(calc(var(--rx,0) * 1deg)) rotateY(calc(var(--ry,0) * 1deg)) translateZ(28px);transform-style:preserve-3d;transition:transform .16s linear;will-change:transform}
-    .medals-shadow{position:absolute;left:10%;right:10%;bottom:1%;height:11%;background:radial-gradient(ellipse,rgba(0,0,0,.85),transparent 70%);filter:blur(18px);z-index:0;transform:translateY(16px)}
+    .medals-stage{position:relative;display:grid;place-items:center;perspective:1400px;perspective-origin:50% 25%;padding:clamp(38px,6vw,78px) 0 clamp(10px,2vw,26px)}
+    .medals-glow{position:absolute;width:min(72%,760px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(216,178,106,.20),rgba(216,178,106,.05) 46%,transparent 68%);filter:blur(26px);pointer-events:none}
+    .medals-bar{position:absolute;z-index:3;left:10%;right:10%;top:clamp(38px,6vw,78px);height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#7c6129 6%,#f0d79c 28%,#d8b26a 50%,#f0d79c 72%,#7c6129 94%,transparent);box-shadow:0 0 26px rgba(216,178,106,.35),0 3px 12px rgba(0,0,0,.65)}
+    .medals-bar:before,.medals-bar:after{content:'';position:absolute;top:50%;width:9px;height:9px;border-radius:50%;transform:translateY(-50%);background:radial-gradient(circle at 35% 30%,#fff3cf,#b98f42 70%);box-shadow:0 0 14px rgba(216,178,106,.55)}
+    .medals-bar:before{left:-4px}
+    .medals-bar:after{right:-4px}
+    .medals-hanger{position:relative;z-index:2;width:min(100%,740px);transform-origin:50% -8%;animation:medalSwing 7.5s cubic-bezier(.45,.05,.55,.95) infinite;will-change:transform;transform-style:preserve-3d}
+    @keyframes medalSwing{0%,100%{transform:rotate(-1.5deg)}25%{transform:rotate(.15deg) translateY(2px)}50%{transform:rotate(1.5deg)}75%{transform:rotate(-.15deg) translateY(2px)}}
+    .medals-hanger.jolt{animation:medalJolt 1.7s cubic-bezier(.2,.8,.3,1) 1}
+    @keyframes medalJolt{0%{transform:rotate(-6deg)}18%{transform:rotate(5deg)}38%{transform:rotate(-3.4deg)}58%{transform:rotate(2deg)}78%{transform:rotate(-1deg)}100%{transform:rotate(0)}}
+    .medals-img{display:block;width:100%;height:auto;filter:drop-shadow(0 26px 32px rgba(0,0,0,.62));transform:rotateX(calc(var(--rx,0) * 1deg)) rotateY(calc(var(--ry,0) * 1deg));transform-style:preserve-3d;transition:transform .18s linear;will-change:transform;cursor:pointer}
+    .medals-shadow{position:absolute;z-index:1;left:16%;right:16%;bottom:3%;height:9%;background:radial-gradient(ellipse,rgba(0,0,0,.8),transparent 70%);filter:blur(22px);animation:shadowSwing 7.5s ease-in-out infinite}
+    @keyframes shadowSwing{0%,100%{transform:translateX(-10px) scaleX(1)}50%{transform:translateX(10px) scaleX(1.04)}}
     .medals-cap{margin:clamp(12px,2vw,22px) 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);text-align:center}
     @media(max-width:640px){
-      .medals-stage{padding-top:6px}
+      .medals-stage{padding-top:46px}
+      .medals-bar{top:46px;left:4%;right:4%}
       .medals-img{transform:none}
       .medals-cap{font-size:.62rem;letter-spacing:.16em}
     }
@@ -208,10 +216,11 @@
           </header>
           <div class="medals-stage" id="medalsStage">
             <div class="medals-glow" aria-hidden="true"></div>
-            <div class="medals-float">
-              <div class="medals-shadow" aria-hidden="true"></div>
-              <img class="medals-img" src="/media/medalhas.webp" alt="Medalhas de judô de Yago Assis — Ouro Fino, Paulista e Open" width="814" height="551" loading="lazy">
+            <div class="medals-bar" aria-hidden="true"></div>
+            <div class="medals-hanger" id="medalsHanger">
+              <img class="medals-img" src="/media/medalhas.webp" alt="Medalhas de judô de Yago Assis — Ouro Fino, Paulista e Open" width="810" height="549" loading="lazy">
             </div>
+            <div class="medals-shadow" aria-hidden="true"></div>
           </div>
           <p class="medals-cap reveal">Ouro Fino · Paulista · Open — 2023 a 2025</p>
         </div>
@@ -280,6 +289,17 @@
         tx = 0; ty = 0;
         if (!raf) raf = requestAnimationFrame(step);
       });
+      const hanger = document.getElementById('medalsHanger');
+      if (hanger) {
+        stage.addEventListener('click', () => {
+          hanger.classList.remove('jolt');
+          void hanger.offsetWidth;
+          hanger.classList.add('jolt');
+        });
+        hanger.addEventListener('animationend', e => {
+          if (e.animationName === 'medalJolt') hanger.classList.remove('jolt');
+        });
+      }
     })();
   </script>
 </body>
