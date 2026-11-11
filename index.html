@@ -129,6 +129,15 @@
     .foot-phone{color:var(--muted);transition:color .25s ease}
     .foot-phone:hover{color:var(--gold)}
     .cta-card .cta-line{font-size:clamp(1.5rem,4vw,2.9rem);line-height:1.06;color:var(--ink);margin:6px 0 24px}
+    /* ── CTA 3D centralizado ── */
+    .cta-inner{perspective:1400px}
+    .cta-card{align-items:center;text-align:center;transform-style:preserve-3d;
+      transform:rotateX(calc(var(--rx,0) * 1deg)) rotateY(calc(var(--ry,0) * 1deg));
+      transition:transform .18s linear,border-color .4s ease,box-shadow .4s ease;will-change:transform}
+    .cta-card .eyebrow{justify-content:center}
+    .cta-card .cta-line{max-width:26ch;margin-left:auto;margin-right:auto}
+    .cta-card .btn{margin-inline:auto}
+    .cta-card:hover{border-color:rgba(216,178,106,.45)}
   </style>
 </head>
   <body>
@@ -603,6 +612,32 @@
         tx = 0; ty = 0;
         if (!raf) raf = requestAnimationFrame(step);
       });
+
+      /* card grande do CTA com tilt 3D */
+      const cta = document.querySelector('.cta-card');
+      const host = cta && (cta.closest('.cta-inner') || cta);
+      if (cta && host) {
+        let r2 = 0, ax = 0, ay = 0, bx = 0, by = 0;
+        const step2 = () => {
+          r2 = 0;
+          ax += (bx - ax) * 0.12; ay += (by - ay) * 0.12;
+          cta.style.setProperty('--ry', (ax * 5).toFixed(2));
+          cta.style.setProperty('--rx', (-ay * 4).toFixed(2));
+          cta.style.setProperty('--mx', (50 + ax * 38).toFixed(1) + '%');
+          cta.style.setProperty('--my', (18 + ay * 40).toFixed(1) + '%');
+          if (Math.abs(bx - ax) > 0.002 || Math.abs(by - ay) > 0.002) r2 = requestAnimationFrame(step2);
+        };
+        host.addEventListener('pointermove', e => {
+          const r = host.getBoundingClientRect();
+          bx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+          by = ((e.clientY - r.top) / r.height - 0.5) * 2;
+          if (!r2) r2 = requestAnimationFrame(step2);
+        });
+        host.addEventListener('pointerleave', () => {
+          bx = 0; by = 0;
+          if (!r2) r2 = requestAnimationFrame(step2);
+        });
+      }
     })();
   </script>
 </body>
