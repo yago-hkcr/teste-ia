@@ -38,7 +38,10 @@
     .hero-card .hero-ring{z-index:1;opacity:.5}
     .hero-card:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(3,4,6,0) 48%,rgba(3,4,6,.78) 100%)}
     .hero-card-foot{z-index:3}
-    @media (max-width:640px){.hero-photo{object-position:50% 8%}}
+    @media (max-width:860px){
+      .hero-card{background:#050506}
+      .hero-photo{object-fit:contain;object-position:50% 50%}
+    }
 
     /* ── medalhas penduradas ── */
     .medals{overflow:visible}
