@@ -79,6 +79,56 @@
     .sound-btn[aria-pressed="false"] .w1,.sound-btn[aria-pressed="false"] .w2{display:none}
     .sound-btn[aria-pressed="false"] .slash{display:block;stroke:var(--gold)}
     .sound-btn[aria-pressed="true"]{color:var(--gold)}
+
+    /* ── cartão 3D do telefone ── */
+    .phone3d{display:inline-block;margin-top:26px;perspective:900px;text-decoration:none;outline:none}
+    .phone3d-inner{
+      position:relative;display:flex;align-items:center;gap:18px;padding:16px 20px;border-radius:16px;
+      background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.015));
+      border:1px solid rgba(216,178,106,.42);transform-style:preserve-3d;
+      transform:rotateX(calc(var(--rx,0) * 1deg)) rotateY(calc(var(--ry,0) * 1deg));
+      transition:transform .16s linear,border-color .35s ease;
+      box-shadow:
+        0 1px 0 #6b5324, 0 2px 0 #5f4a20, 0 3px 0 #533f1b, 0 4px 0 #473616,
+        0 5px 0 #3a2c12, 0 6px 0 #2e230e, 0 22px 44px -18px rgba(0,0,0,.9),
+        inset 0 1px 0 rgba(255,255,255,.16);
+      will-change:transform;overflow:hidden;
+    }
+    .phone3d:hover .phone3d-inner{border-color:rgba(240,215,156,.8)}
+    .phone3d-inner:before{
+      content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+      background:radial-gradient(220px circle at var(--mx,50%) var(--my,20%),rgba(216,178,106,.18),transparent 62%);
+      opacity:0;transition:opacity .35s ease;
+    }
+    .phone3d:hover .phone3d-inner:before{opacity:1}
+    .phone3d-ico{
+      position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;flex:none;
+      background:linear-gradient(145deg,#f0d79c,#b98f42);color:#14100a;
+      box-shadow:0 10px 22px -10px rgba(216,178,106,.8),inset 0 1px 0 rgba(255,255,255,.55);
+      transform:translateZ(18px);
+    }
+    .phone3d-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+    .phone3d-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+    .phone3d-kicker{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+    .phone3d-num{
+      font-family:var(--display);font-size:clamp(1.5rem,3.2vw,2.05rem);line-height:1;letter-spacing:.015em;color:#f6f1e6;
+      text-shadow:0 1px 0 #b98f42,0 2px 0 #9a7634,0 3px 0 #7c5f28,0 4px 0 #5f471d,0 5px 0 #463414,0 10px 26px rgba(0,0,0,.65);
+      white-space:nowrap;transform:translateZ(26px);
+    }
+    .phone3d-go{
+      margin-left:6px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(216,178,106,.5);
+      color:var(--gold);font-size:.8rem;transform:translateZ(14px);transition:background .3s ease,color .3s ease
+    }
+    .phone3d:hover .phone3d-go{background:var(--gold);color:#14100a}
+    @media(max-width:640px){
+      .phone3d{display:block;margin-top:22px}
+      .phone3d-inner{padding:14px 16px;gap:14px}
+      .phone3d-num{font-size:1.45rem}
+      .phone3d-ico{width:40px;height:40px}
+    }
+    .foot-phone{color:var(--muted);transition:color .25s ease}
+    .foot-phone:hover{color:var(--gold)}
+    .cta-card .cta-line{font-size:clamp(1.5rem,4vw,2.9rem);line-height:1.06;color:var(--ink);margin:6px 0 24px}
   </style>
 </head>
   <body>
@@ -268,6 +318,19 @@
               <a class="btn primary big" data-athlete="instagram" href="#" target="_blank" rel="noopener">
                 <span data-athlete="handle">@yagoassis.ofc</span>
               </a>
+
+              <a class="phone3d" href="https://wa.me/5519992440358" target="_blank" rel="noopener" aria-label="Chamar Yago no WhatsApp: 19 99244-0358">
+                <span class="phone3d-inner" id="phone3dInner">
+                  <span class="phone3d-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5 4h3l1.6 4-2 1.3a13 13 0 0 0 6.1 6.1l1.3-2 4 1.6v3a2 2 0 0 1-2.2 2A17 17 0 0 1 3 6.2 2 2 0 0 1 5 4z"></path></svg>
+                  </span>
+                  <span class="phone3d-copy">
+                    <span class="phone3d-kicker">whatsapp · direto</span>
+                    <span class="phone3d-num">19 99244-0358</span>
+                  </span>
+                  <span class="phone3d-go" aria-hidden="true">↗</span>
+                </span>
+              </a>
             </div>
           </div>
         </div>
@@ -286,6 +349,7 @@
           <a href="#galeria">Momentos</a>
           <a href="#medalhas">Conquistas</a>
         </nav>
+        <a class="foot-phone" href="tel:+5519992440358">19 99244-0358</a>
         <a class="foot-ig" data-athlete="instagram" href="#" target="_blank" rel="noopener">
           <span data-athlete="handle">@yagoassis.ofc</span>
         </a>
@@ -512,6 +576,34 @@
     });
   }
 })();
+  </script>
+  <script>
+    (() => {
+      const wrap = document.querySelector('.phone3d');
+      const inner = document.getElementById('phone3dInner');
+      if (!wrap || !inner) return;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !matchMedia('(pointer:fine)').matches) return;
+      let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
+      const step = () => {
+        raf = 0;
+        cx += (tx - cx) * 0.14; cy += (ty - cy) * 0.14;
+        inner.style.setProperty('--ry', (cx * 9).toFixed(2));
+        inner.style.setProperty('--rx', (-cy * 7).toFixed(2));
+        inner.style.setProperty('--mx', (50 + cx * 40).toFixed(1) + '%');
+        inner.style.setProperty('--my', (24 + cy * 34).toFixed(1) + '%');
+        if (Math.abs(tx - cx) > 0.002 || Math.abs(ty - cy) > 0.002) raf = requestAnimationFrame(step);
+      };
+      wrap.addEventListener('pointermove', e => {
+        const r = wrap.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+        if (!raf) raf = requestAnimationFrame(step);
+      });
+      wrap.addEventListener('pointerleave', () => {
+        tx = 0; ty = 0;
+        if (!raf) raf = requestAnimationFrame(step);
+      });
+    })();
   </script>
 </body>
 </html>
